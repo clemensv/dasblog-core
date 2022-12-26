@@ -1,8 +1,12 @@
 ﻿@model DasBlog.Web.Models.BlogViewModels.PostViewModel
 
+@using DasBlog.Services;
+@inject IDasBlogSettings dasBlogSettings
+
 @{
     ViewBag.Title = "Create";
-    Layout = "../../Themes/dasblog/_Layout.cshtml";
+    //Layout = "../../Themes/dasblog/_Layout.cshtml";
+    string.Format("/Themes/{0}/{1}", dasBlogSettings.SiteConfiguration.Theme, "_Layout.cshtml");
 }
 
 <h1>@ViewData["Title"]</h1>

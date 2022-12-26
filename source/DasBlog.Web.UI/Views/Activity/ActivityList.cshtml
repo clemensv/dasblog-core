@@ -3,9 +3,12 @@
 
 @model System.Collections.Generic.List<EventDataDisplayItem>
 
+@using DasBlog.Services;
+@inject IDasBlogSettings dasBlogSettings
+
 @{
     ViewBag.Title = "Activity Report";
-    Layout = "../../Themes/dasblog/_Layout.cshtml";
+    string.Format("/Themes/{0}/{1}", dasBlogSettings.SiteConfiguration.Theme, "_Layout.cshtml");
 }
 
 @functions

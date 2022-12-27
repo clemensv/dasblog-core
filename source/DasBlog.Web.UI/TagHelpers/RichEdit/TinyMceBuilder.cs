@@ -36,7 +36,7 @@ namespace DasBlog.Web.TagHelpers.RichEdit
 					<script>
 					tinymce.init({{
 						selector: '#{0}',
-						plugins: 'code textpattern',
+						plugins: 'code textpattern image',
 						relative_urls : false,
 						remove_script_host : true,
 						document_base_url : '" + dasBlogSettings.GetBaseUrl() + @"'

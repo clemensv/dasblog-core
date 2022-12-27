@@ -48,6 +48,7 @@ namespace DasBlog.Web.Settings
 		protected void SinglePost(PostViewModel post)
 		{
 			DefaultPage();
+			DefaultPage();
 			if (post != null)
 			{
 				ViewData["PageTitle"] = post.Title;
@@ -84,6 +85,11 @@ namespace DasBlog.Web.Settings
 
         protected void DefaultPage(string pageTitle = "")
 		{
+			ViewData["PermaLink"] = dasBlogSettings.GetBaseUrl();
+			ViewData["TwitterCreator"] = dasBlogSettings.MetaTags.TwitterCreator;
+			ViewData["TwitterImage"] = dasBlogSettings.MetaTags.TwitterImage;
+			ViewData["TwitterSite"] = dasBlogSettings.MetaTags.TwitterSite;
+			ViewData["TwitterCard"] = dasBlogSettings.MetaTags.TwitterCard;
 			ViewData["PermaLink"] = dasBlogSettings.GetBaseUrl();
 			ViewData["TwitterCreator"] = dasBlogSettings.MetaTags.TwitterCreator;
 			ViewData["TwitterImage"] = dasBlogSettings.MetaTags.TwitterImage;

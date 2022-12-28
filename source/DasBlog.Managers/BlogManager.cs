@@ -148,7 +148,7 @@ namespace DasBlog.Managers
 			{
 				Type = eventType,
 				Source = new Uri(dasBlogSettings.GetBaseUrl()),
-				Subject = entry.Link,
+				Subject = MakePermaLinkFromCompressedTitle(entry).ToString(),
 				Data = MapEntryToCloudEventData(entry),
 				Id = Guid.NewGuid().ToString(),
 				Time = DateTime.UtcNow,
@@ -211,7 +211,7 @@ namespace DasBlog.Managers
 				ModifiedUtc = entry.ModifiedUtc,
 				Tags = entry.Categories,
 				Description = entry.Description,
-				PermaLink = entry.Link,
+				PermaLink = MakePermaLinkFromCompressedTitle(entry).ToString(),
 				DetailsLink = dasBlogSettings.GetRssEntryUrl(entry.EntryId),
 				IsPublic = entry.IsPublic,
 				Author = entry.Author,

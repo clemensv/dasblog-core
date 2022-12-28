@@ -153,7 +153,10 @@ namespace DasBlog.Managers
 				Id = Guid.NewGuid().ToString(),
 				Time = DateTime.UtcNow,
 			};
-			cloudEvent.SetAttributeFromString("tags", entry.Categories);
+			if (!string.IsNullOrEmpty(entry.Categories))
+			{
+				cloudEvent.SetAttributeFromString("tags", entry.Categories);
+			}
 			RaiseCloudEvent(cloudEvent);
 		}
 

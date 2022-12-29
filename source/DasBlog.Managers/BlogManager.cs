@@ -13,6 +13,9 @@ using CloudNative.CloudEvents;
 using CloudNative.CloudEvents.Http;
 using CloudNative.CloudEvents.SystemTextJson;
 using System.Net.Http;
+using DasBlog.Core.Extensions;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace DasBlog.Managers
 {
@@ -262,6 +265,17 @@ namespace DasBlog.Managers
 				// if the post is missing categories, then set the categories to empty string.
 				if (entry.Categories == null)
 					entry.Categories = "";
+
+				var hashtags = Regex.Matches(entry.Content.StripHTMLFromText(), "#([a-zA-Z0-9_]+)");
+				foreach (Match hashtag in hashtags)
+				{
+					var tag = hashtag.Groups[1].Value.ToLower();
+					if (!Regex.IsMatch(entry.Categories, $"\\b{tag}\\b"))
+					{
+						entry.Categories += ";" + tag;
+					}
+				}
+				entry.Categories = entry.Categories.TrimStart(';');
 
 				rtn = dataService.SaveEntry(entry, entry.IsPublic
 											? trackbackList : null, crosspostList);

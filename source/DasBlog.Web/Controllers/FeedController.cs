@@ -9,6 +9,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -75,7 +76,7 @@ namespace DasBlog.Web.Controllers
 				id = rssItem.Id,
 				title = rssItem.Title,
 				author = rssItem.Author,
-				categories = rssItem.Categories,
+				categories = string.Join(';',(from RssCategory c in rssItem.Categories select c.Text)),
 				enclosure = rssItem.Enclosure,
 				description = rssItem.Description,
 				link = rssItem.Link,

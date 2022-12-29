@@ -14,6 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using DasBlog.Core.Extensions;
+using System.Text.RegularExpressions;
 
 namespace DasBlog.Web.Controllers
 {
@@ -71,12 +73,35 @@ namespace DasBlog.Web.Controllers
 				rssItem = subscriptionManager.GetRssItem(id);
 				memoryCache.Set(CACHEKEY_RSS + id, rssItem, SiteCacheSettings());
 			}
+
+			if ( string.IsNullOrEmpty(rssItem.Description) )
+			{
+				rssItem.Description = rssItem.Body;
+			}
+			var categoriesString = string.Join(';', (from RssCategory c in rssItem.Categories select c.Text));
+
+			// we're doing some work here to make the description fit into 280 characters
+			// when the (back-)link is taken into consideration. 
+			rssItem.Description = rssItem.Description.StripHTMLFromText();
+			var maxLen = 280 - rssItem.Link.Length - rssItem.Title.Length - 8; // fillers
+			if (rssItem.Description.Length > maxLen)
+			{
+				Regex r = new Regex(@"[^\s\u0000-\u001F]+$");
+				var truncatedString = rssItem.Description.Substring(0, maxLen).TrimEnd();
+				var lastExpression = r.Match(truncatedString);
+				if (lastExpression != null && !string.Equals(lastExpression.Groups[0].Value,rssItem.Description.Substring(truncatedString.Length - lastExpression.Groups[0].Value.Length)))
+				{
+					rssItem.Description = r.Replace(truncatedString, "").TrimEnd();
+				}
+				rssItem.Description += " ...";
+			}
+
 			return Ok(new
 			{
 				id = rssItem.Id,
 				title = rssItem.Title,
 				author = rssItem.Author,
-				categories = string.Join(';',(from RssCategory c in rssItem.Categories select c.Text)),
+				categories = categoriesString,
 				enclosure = rssItem.Enclosure,
 				description = rssItem.Description,
 				link = rssItem.Link,

@@ -36,11 +36,11 @@ namespace DasBlog.Web.TagHelpers.RichEdit
 					<script>
 					tinymce.init({{
 						selector: '#{0}',
-						plugins: 'code textpattern image link quickbars fullscreen paste',
+						plugins: 'code textpattern image link quickbars paste',
                         menubar: 'edit insert view format tools',
 						toolbar: 'undo redo | image link | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | fullscreen',
 						relative_urls : false,
-						remove_script_host : true,
+						remove_script_host : false,
 						document_base_url : '" + dasBlogSettings.GetBaseUrl() + @"'
 					}});
 					</script>";

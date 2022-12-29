@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace DasBlog.Web.Controllers
 {
@@ -55,6 +56,30 @@ namespace DasBlog.Web.Controllers
 				memoryCache.Set(CACHEKEY_RSS+id, rssItem, SiteCacheSettings());
 			}
 			return Ok(rssItem);
+		}
+
+		[Produces("application/json")]
+		[HttpGet("feed/rss/{id}/json"), HttpHead("feed/rss/{id}/json")]
+		public IActionResult RssItemAsJson(string id)
+		{
+			if (!memoryCache.TryGetValue(CACHEKEY_RSS + id, out RssItem rssItem))
+			{
+				rssItem = subscriptionManager.GetRssItem(id);
+				memoryCache.Set(CACHEKEY_RSS + id, rssItem, SiteCacheSettings());
+			}
+			return Ok(new
+			{
+				id = rssItem.Id,
+				title = rssItem.Title,
+				author = rssItem.Author,
+				categories = rssItem.Categories,
+				enclosure = rssItem.Enclosure,
+				description = rssItem.Description,
+				link = rssItem.Link,
+				pubDate= rssItem.PubDate,
+				comments = rssItem.Comments,
+				body = rssItem.Body
+			});
 		}
 
 		[Produces("text/xml")]

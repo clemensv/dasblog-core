@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -154,6 +155,10 @@ namespace DasBlog.Services.Rss.Rss20
 
 		[XmlElement("enclosure")]
 		public Enclosure Enclosure { get; set; }
+
+		// this is for passing a non-XHTML body around when the RssItem is not renedered in XML
+		[XmlIgnore]
+		public string Body { get; set; }
 
 		[XmlAnyElement]
         public XmlElement[] anyElements;

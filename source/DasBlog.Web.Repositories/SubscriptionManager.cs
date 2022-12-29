@@ -315,6 +315,8 @@ namespace DasBlog.Managers
 			else
 			{
 				var content = (feedView ? PreprocessItemContent(entry.EntryId, entry.Content) : entry.Content);
+				// unencoded content, this is not serialized into XML output
+				item.Body = content;
 				if (!dasBlogSettings.SiteConfiguration.HtmlTidyContent && feedView)
 				{
 					item.Description = "<div>" + content + "</div>";

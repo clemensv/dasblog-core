@@ -423,6 +423,7 @@ namespace DasBlog.Managers
                 }
                 else
                 {
+					item.Body = entry.Content;
                     if (dasBlogSettings.SiteConfiguration.HtmlTidyContent == false)
                     {
                         item.Description = "<div>" + PreprocessItemContent(entry.EntryId, entry.Content) + "</div>";

@@ -61,6 +61,30 @@ namespace DasBlog.Web.Controllers
 			return Ok(rssItem);
 		}
 
+		[Produces("application/json")]
+		[HttpGet("feed/rss/{id}/json"), HttpHead("feed/rss/{id}/json")]
+		public IActionResult RssItemAsJson(string id)
+		{
+			if (!memoryCache.TryGetValue(CACHEKEY_RSS + id, out RssItem rssItem))
+			{
+				rssItem = subscriptionManager.GetRssItem(id);
+				memoryCache.Set(CACHEKEY_RSS + id, rssItem, SiteCacheSettings());
+			}
+			return Ok(new
+			{
+				id = rssItem.Id,
+				title = rssItem.Title,
+				author = rssItem.Author,
+				categories = rssItem.Categories,
+				enclosure = rssItem.Enclosure,
+				description = rssItem.Description,
+				link = rssItem.Link,
+				pubDate= rssItem.PubDate,
+				comments = rssItem.Comments,
+				body = rssItem.Body
+			});
+		}
+
 		[Produces("text/xml")]
 		[HttpGet("feed/tags/{category}/rss"), HttpHead("feed/tags/{category}/rss")]
         public IActionResult RssByCategory(string category)

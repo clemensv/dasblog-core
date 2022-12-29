@@ -658,7 +658,7 @@ namespace DasBlog.Web.Controllers
 				return View(post);
 			}
 
-			post.Content += string.Format("<p><img border=\"0\" src=\"{0}\"></p>", fullimageurl);
+			post.Content += string.Format("<p><img border=\"0\" src=\"{0}\"></p>", dasBlogSettings.RelativeToRoot(fullimageurl));
 			ModelState.Remove(nameof(post.Content)); // ensure that model change is included in response
 			return View(post);
 		}

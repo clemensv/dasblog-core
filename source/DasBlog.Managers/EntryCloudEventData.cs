@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace DasBlog.Managers
 {
-	internal class EntryCloudEventData
+	public class EntryCloudEventData
 	{
 		[JsonPropertyName("id")]
 		public string Id { get; internal set; }

@@ -22,6 +22,8 @@ using reCAPTCHA.AspNetCore;
 using Markdig;
 using DasBlog.Core.Extensions;
 using System.Text.RegularExpressions;
+using DasBlog.Core.Extensions;
+using System.Text.RegularExpressions;
 using DasBlog.Services.Site;
 
 namespace DasBlog.Web.Controllers
@@ -157,12 +159,20 @@ namespace DasBlog.Web.Controllers
 					modelViewCreator.AddAllLanguages(pvm);
 					List<CategoryViewModel> allcategories = mapper.Map<List<CategoryViewModel>>(blogManager.GetCategories());
 
+					HashSet<string> tags = new HashSet<string>();
+					var matches = Regex.Matches(pvm.Content.StripHTMLFromText(), "#([a-zA-Z0-9_]+)\r\n");
+					foreach (Match hashtag in matches)
+					{
+						tags.Add(hashtag.Groups[1].Value.ToLower());
+					}
+
 					foreach (var cat in allcategories)
 					{
-						if (pvm.Categories.Count(x => x.Category == cat.Category) > 0)
+						if (pvm.Categories.Count(x => x.Category.Equals(cat.Category, StringComparison.InvariantCultureIgnoreCase)) > 0 ||
+							tags.Contains(cat.Category.ToLower()))
 						{
 							cat.Checked = true;
-						}
+						}						
 					}
 
 					pvm.AllCategories = allcategories;

@@ -25,6 +25,7 @@ using System.Xml.Linq;
 using CloudNative.CloudEvents.Http;
 using CloudNative.CloudEvents.SystemTextJson;
 using System.Net.Http;
+using DasBlog.Core.Extensions;
 
 namespace DasBlog.Managers
 {
@@ -406,6 +407,17 @@ namespace DasBlog.Managers
 				if (entry.Categories == null)
 					entry.Categories = "";
 
+				HashSet<string> tags = new HashSet<string>();
+				var matches = Regex.Matches(entry.Content.StripHTMLFromText(), "#([a-zA-Z0-9_]+)");
+				foreach (Match hashtag in matches)
+				{
+					var tag = hashtag.Groups[1].Value.ToLower();
+					if ( !Regex.IsMatch(entry.Categories, $"\\b{tag}\\b"))
+					{
+						entry.Categories += ";" + tag;
+					}
+				}
+				entry.Categories = entry.Categories.TrimStart(';');
 				rtn = dataService.SaveEntry(entry, MaybeBuildWeblogPingInfo(), entry.IsPublic
 											? trackbackList : null, MaybeBuildPingbackInfo(entry), crosspostList);
 

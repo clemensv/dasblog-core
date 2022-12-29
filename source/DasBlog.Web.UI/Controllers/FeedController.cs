@@ -72,7 +72,7 @@ namespace DasBlog.Web.Controllers
 				id = rssItem.Id,
 				title = rssItem.Title,
 				author = rssItem.Author,
-				categories = rssItem.Categories,
+				categories = string.Join(';',(from RssCategory c in rssItem.Categories select c.Text)),
 				enclosure = rssItem.Enclosure,
 				description = rssItem.Description,
 				link = rssItem.Link,

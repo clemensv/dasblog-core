@@ -8,7 +8,7 @@ namespace DasBlog.Web.TagHelpers.RichEdit
 	{
 		private readonly ISiteConfig siteConfig;
 		private readonly IUrlResolver urlResolver;
-		private const string TINY_MCE_SERVICE_URL = "https://cdn.tiny.cloud/1/{0}/tinymce/5/tinymce.min.js";
+		private const string TINY_MCE_SERVICE_URL = "https://cdn.tiny.cloud/1/{0}/tinymce/6/tinymce.min.js";
 
 		public TinyMceBuilder(ISiteConfig siteConfig, IUrlResolver urlResolver)
 		{
@@ -40,7 +40,7 @@ namespace DasBlog.Web.TagHelpers.RichEdit
 						selector: '#{0}',
 						plugins: 'code textpattern image link quickbars fullscreen paste',
                         menubar: 'edit insert view format tools',
-						toolbar: 'undo redo | image link | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | fullscreen'
+						toolbar: 'undo redo | image link | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | fullscreen',
 						relative_urls : false,
 						remove_script_host : true,
 						document_base_url : '" + urlResolver.GetBaseUrl() + @"'

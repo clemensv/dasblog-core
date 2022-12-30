@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DasBlog.Core.Common;
 using DasBlog.Services;
 using newtelligence.DasBlog.Runtime;
 
@@ -25,6 +26,9 @@ namespace DasBlog.Web.Models.BlogViewModels
 
 				foreach (var category in categories)
 				{
+					if (category.StartsWith(Constants.InvisibleCategoryPrefix))
+						continue;
+
 					var archiveItem = CategoryPostItem.CreateFromEntry(entry, dasBlogSettings);
 					archiveItem.Category = category;
 					if (viewModel.Categories.ContainsKey(category))

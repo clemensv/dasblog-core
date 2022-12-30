@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
+using DasBlog.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Server.IIS.Core;
 using Newtonsoft.Json;
 
 namespace DasBlog.Web.Models.BlogViewModels
@@ -61,6 +64,12 @@ namespace DasBlog.Web.Models.BlogViewModels
 		public int Order { get; set; } = 0;
 
 
+        public List<string> ErrorMessages { get; set; }
+
+		internal void InjectCategoryLinks(IDasBlogSettings dasBlogSettings)
+		{
+			Content = Regex.Replace(Content, @"#(\w+)", $"<a href=\"{dasBlogSettings.RelativeToRoot("category/")}$1\">#$1 </a>");
+		}
 		public List<string> ErrorMessages { get; set; }
 	}
 }

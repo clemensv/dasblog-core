@@ -49,6 +49,9 @@
 	
 		public const string SearcherRouteName = "searcher";
 
+		public const int MaxSurrogateTitleLength = 50;
+		public const string InvisibleCategoryPrefix = "fwd";
+
 	}
 
 }

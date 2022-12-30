@@ -76,10 +76,24 @@ namespace DasBlog.Web.Controllers
 			}
 			var categoriesString = string.Join(';', (from RssCategory c in rssItem.Categories select c.Text));
 
+			rssItem.Description = rssItem.Description.StripHTMLFromText();
+
+			string quoteLink = "";
+			// special twitter treat: if there's a twitter link in the description text, move that all the way to the end. 
+			// this will only capture the first link in the text.
+			string twitterLinkPattern = "((https?://)?(mobile\\.)?twitter\\.com/[^\\s]+)";
+			Match twitterLinkMatch = Regex.Match(rssItem.Description, twitterLinkPattern);
+			if (twitterLinkMatch.Success)
+			{
+				quoteLink = twitterLinkMatch.Groups[1].Value;
+				rssItem.Description = rssItem.Description.Replace(quoteLink, "");
+			}
+
 			// we're doing some work here to make the description fit into 280 characters
 			// when the (back-)link is taken into consideration. 
-			rssItem.Description = rssItem.Description.StripHTMLFromText();
-			var maxLen = 280 - rssItem.Link.Length - rssItem.Title.Length - 8; // fillers
+			// maxLen is 280 minus 6 characters for separators and fillers and 23 characters for a quoteLink to be appended later if present
+			var maxLen = 280 - rssItem.Link.Length - rssItem.Title.Length - 6 - (string.IsNullOrEmpty(quoteLink)?0:23); 
+			
 			if (rssItem.Description.Length > maxLen)
 			{
 				Regex r = new Regex(@"[^\s\u0000-\u001F]+$");
@@ -92,6 +106,8 @@ namespace DasBlog.Web.Controllers
 				rssItem.Description += " ...";
 			}
 
+			
+
 			return Ok(new
 			{
 				id = rssItem.Id,
@@ -103,7 +119,8 @@ namespace DasBlog.Web.Controllers
 				link = rssItem.Link,
 				pubDate= rssItem.PubDate,
 				comments = rssItem.Comments,
-				body = rssItem.Body
+				body = rssItem.Body, 
+				quoteLink = quoteLink
 			});
 		}
 

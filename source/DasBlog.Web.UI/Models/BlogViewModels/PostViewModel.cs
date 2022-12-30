@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using DasBlog.Services;
+using DasBlog.Services.Rss.Rss20;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Server.IIS.Core;
@@ -10,7 +14,7 @@ using Newtonsoft.Json;
 
 namespace DasBlog.Web.Models.BlogViewModels
 {
-	public class PostViewModel
+	public partial class PostViewModel
 	{
 		[Required]
 		[MinLength(1)]

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace DasBlog.Web.Models.BlogViewModels
 {
-	public class PostViewModel
+	public partial class PostViewModel
 	{
 		[Required]
 		[MinLength(1)]

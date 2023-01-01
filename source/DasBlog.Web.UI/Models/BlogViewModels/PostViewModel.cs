@@ -77,7 +77,7 @@ namespace DasBlog.Web.Models.BlogViewModels
 
 		internal void InjectCategoryLinks(IDasBlogSettings dasBlogSettings)
 		{
-			Content = Regex.Replace(Content, @"#(\w+)", $"<a href=\"{dasBlogSettings.RelativeToRoot("category/")}$1\">#$1 </a>");
+			Content = Regex.Replace(Content, @"(?<!=['""])#(\w+)", $"<a href=\"{dasBlogSettings.RelativeToRoot("category/")}$1\">#$1 </a>");
 		}
 		public List<string> ErrorMessages { get; set; }
 	}

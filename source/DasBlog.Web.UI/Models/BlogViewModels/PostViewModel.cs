@@ -16,11 +16,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Server.IIS.Core;
 using Newtonsoft.Json;
 using HtmlAgilityPack;
+using DasBlog.Web.Models.BlogViewModels.WebManifest;
+using System.Collections.Concurrent;
+using System.Net;
 
 namespace DasBlog.Web.Models.BlogViewModels
 {
 	public partial class PostViewModel
 	{
+
 		[Required]
 		[MinLength(1)]
 		public string Title { get; set; }
@@ -74,6 +78,10 @@ namespace DasBlog.Web.Models.BlogViewModels
 
 
 		public List<string> ErrorMessages { get; set; }
+
+		private static ConcurrentDictionary<string, WebManifest.WebManifest> manifests = new ConcurrentDictionary<string, WebManifest.WebManifest>();
+		private static ConcurrentDictionary<string, string> openGraphEmbeddings = new ConcurrentDictionary<string, string>();
+		private static ConcurrentDictionary<string, OEmbed> oEmbedEmbeddings = new ConcurrentDictionary<string, OEmbed>();
 
 		internal void InjectCategoryLinks(IDasBlogSettings dasBlogSettings)
 		{

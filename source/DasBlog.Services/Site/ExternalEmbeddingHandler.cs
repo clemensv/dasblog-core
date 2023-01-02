@@ -39,8 +39,8 @@ namespace DasBlog.Services.Site
 		{
 			if (dasBlogSettings.SiteConfiguration.EnableRewritingHashtagsToCategoryLinks)
 			{
-				return Regex.Replace(content, @"(?<!=['""])#(\w+)", $"<a href=\"{dasBlogSettings.RelativeToRoot("category/")}$1\">#$1 </a>");
-			}
+			return Regex.Replace(content, @"(?<!=['""])#(\w+)", $"<a href=\"{dasBlogSettings.RelativeToRoot("category/")}$1\">#$1 </a>");
+		}
 			else
 			{
 				return content;

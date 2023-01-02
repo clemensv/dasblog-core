@@ -36,7 +36,7 @@ namespace DasBlog.Web.TagHelpers.RichEdit
 					<script>
 					tinymce.init({{
 						selector: '#{0}',
-						plugins: 'code textpattern image link quickbars paste',
+						plugins: 'code textpattern image link quickbars paste autosave',
                         menubar: 'edit insert view format tools',
 						toolbar: 'undo redo | image link | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | fullscreen',
 						relative_urls : false,

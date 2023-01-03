@@ -30,6 +30,11 @@ namespace DasBlog.Web.Controllers
 		[HttpGet(".well-known/webfinger")]
 		public ActionResult WebFinger(string resource)
 		{
+			if (resource== null)
+			{
+				return BadRequest();
+			}
+
 			if (resource.StartsWith("acct:"))
 			{
 				resource = resource.Remove(0, 5);

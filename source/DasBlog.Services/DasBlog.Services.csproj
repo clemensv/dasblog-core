@@ -13,6 +13,8 @@
     <ProjectReference Include="..\Subtext.Akismet\Subtext.Akismet.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CloudNative.CloudEvents" />
+    <PackageReference Include="CloudNative.CloudEvents.SystemTextJson" />
     <PackageReference Include="Coravel" />
     <PackageReference Include="HtmlAgilityPack" />
     <PackageReference Include="Kveer.XmlRPC" />

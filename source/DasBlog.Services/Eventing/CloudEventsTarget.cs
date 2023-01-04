@@ -1,8 +1,6 @@
-﻿#region Copyright (c) 2003, newtelligence AG. All rights reserved.
+﻿#region Copyright (c) 2023 dasBlog Authors
 /*
-// Copyright (c) 2003, newtelligence AG. (http://www.newtelligence.com)
-// Original BlogX Source Code: Copyright (c) 2003, Chris Anderson (http://simplegeek.com)
-// All rights reserved.
+// Copyright (c) 2023, dasBlog Authors
 //
 // Redistribution and use in source and binary forms, with or without modification, are permitted
 // provided that the following conditions are met:
@@ -26,14 +24,9 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -------------------------------------------------------------------------
 //
-// Original BlogX source code (c) 2003 by Chris Anderson (http://simplegeek.com)
-//
-// newtelligence is a registered trademark of newtelligence Aktiengesellschaft.
-//
 // For portions of this software, the some additional copyright notices may apply
 // which can either be found in the license.txt file included in the source distribution
 // or following this notice.
-//
 */
 #endregion
 
@@ -44,10 +37,8 @@ using System.Collections.ObjectModel;
 using System.Xml;
 using System.Xml.Serialization;
 
-
-namespace newtelligence.DasBlog.Runtime
+namespace DasBlog.Services.Eventing
 {
-
 	public class CloudEventsTargetHeader
 	{
 		public string Name { get; set; }
@@ -119,7 +110,7 @@ namespace newtelligence.DasBlog.Runtime
 				throw new ArgumentNullException("items");
 			}
 
-			this.AddRange(items);
+			AddRange(items);
 		}
 
 		/// <summary>
@@ -135,9 +126,9 @@ namespace newtelligence.DasBlog.Runtime
 				throw new ArgumentNullException("items");
 			}
 
-			foreach (CloudEventsTarget item in items)
+			foreach (var item in items)
 			{
-				this.Add(item);
+				Add(item);
 			}
 		}
 	}

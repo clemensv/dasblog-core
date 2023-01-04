@@ -39,6 +39,7 @@
 
 using DasBlog.Core.Common.Comments;
 using DasBlog.Core.Configuration;
+using DasBlog.Services.Eventing;
 using newtelligence.DasBlog.Runtime;
 
 using System;
@@ -47,7 +48,7 @@ using System.Xml.Serialization;
 
 namespace DasBlog.Services.ConfigFile.Interfaces
 {
-    public interface ISiteConfig
+	public interface ISiteConfig
     {
         string Title { get; set; }
 

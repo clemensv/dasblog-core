@@ -7,6 +7,7 @@ using DasBlog.Services;
 using DasBlog.Services.ActivityLogs;
 using DasBlog.Services.ConfigFile;
 using DasBlog.Services.ConfigFile.Interfaces;
+using DasBlog.Services.Eventing;
 using DasBlog.Services.FileManagement;
 using DasBlog.Services.FileManagement.Interfaces;
 using DasBlog.Services.Scheduler;
@@ -102,6 +103,7 @@ namespace DasBlog.Web
 				.AddSingleton<IConfigFileService<SiteConfig>, SiteConfigFileService>()
 				.AddSingleton<IConfigFileService<SiteSecurityConfigData>, SiteSecurityConfigFileService>()
 				.AddSingleton<IExternalEmbeddingHandler, ExternalEmbeddingHandler>()
+				.AddSingleton<ICloudEventsSource, CloudEventsSource>()
 				.AddSingleton<IThemeManager, ThemeManager>()
 				.AddSingleton<IThemeContentValidator, ThemeContentValidator>()
 				.AddSingleton<IStaticPageManager, StaticPageManager>()

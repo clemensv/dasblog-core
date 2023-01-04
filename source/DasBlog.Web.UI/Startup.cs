@@ -41,6 +41,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Net.Http.Headers;
 using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using DasBlog.Services.Eventing;
 
 namespace DasBlog.Web
 {
@@ -224,6 +225,8 @@ namespace DasBlog.Web
 				.AddSingleton<IConfigFileService<SiteSecurityConfigData>, SiteSecurityConfigFileService>();
 
 			services.AddSingleton<IExternalEmbeddingHandler, ExternalEmbeddingHandler>();
+
+			services.AddSingleton<ICloudEventsSource, CloudEventsSource>();
 
 
 			services

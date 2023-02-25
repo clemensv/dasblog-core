@@ -25,6 +25,13 @@ using System.Text.RegularExpressions;
 using DasBlog.Core.Extensions;
 using System.Text.RegularExpressions;
 using DasBlog.Services.Site;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+using System.Net.Mime;
+using newtelligence.DasBlog.Runtime;
+using EventDataItem = DasBlog.Services.ActivityLogs.EventDataItem;
+using EventCodes = DasBlog.Services.ActivityLogs.EventCodes;
 
 namespace DasBlog.Web.Controllers
 {
@@ -246,6 +253,137 @@ namespace DasBlog.Web.Controllers
 			return View(post);
 		}
 
+		/// <summary>
+		/// This method is for the companion app and allows submitting a snippet 
+		/// as a blog post in form of a plain POST. The method implements a 
+		/// SAS based AuthZ mechanism
+		/// </summary>
+		/// <param name="request"></param>
+		/// <returns></returns>
+		[HttpPost("post/submit"), AllowAnonymous]
+		public IActionResult SubmitContent()
+		{
+			var request = HttpContext.Request;
+			string tokenUsername = null;
+			var token = request.Headers.Authorization;
+			
+			// check the token and extract the username from the token while we're at it
+			if ( !VerifySasToken(token, new Uri(new Uri(dasBlogSettings.GetBaseUrl()), "post/submit").ToString(),
+				(user) =>
+				{
+					var tokenUser = dasBlogSettings.SecurityConfiguration.Users.Where(
+						(u) => { return (u.EmailAddress == user); }).FirstOrDefault();
+					if (tokenUser != null)
+					{
+						tokenUsername = tokenUser.EmailAddress;
+						return Array.ConvertAll<string, byte>(tokenUser.Password.Split('-'), s => Convert.ToByte(s, 16));
+					}
+					return null;
+				}))
+			{
+				return new ForbidResult();
+			}
+
+			string title = string.Empty;
+			if (request.Headers.TryGetValue("Title", out var titles))
+			{
+				title = titles[0];
+			}
+
+			Entry entry = new Entry();
+			entry.Initialize();
+			entry.Title = title;
+			entry.Author = tokenUsername;
+			entry.IsPublic = true;
+
+			string tags = string.Empty;
+			if (!string.IsNullOrEmpty(entry.Title))
+			{
+				var matches = Regex.Matches(entry.Title, "#([a-zA-Z0-9_]+)");
+				foreach (Match hashtag in matches)
+				{
+					tags += "#" + hashtag.Groups[1].Value.ToLower() + " ";
+				}
+			}
+			tags = tags.Trim();
+			entry.Title = Regex.Replace(entry.Title, "#([a-zA-Z0-9_]+)", "").Trim();
+			
+			if (request.ContentType.StartsWith("image/"))
+			{
+				string fileName = null;
+				if (request.Headers.ContainsKey("Content-Disposition"))
+				{
+					var contentDisposition = request.Headers["Content-Disposition"].First();
+					var fileNameMatch = Regex.Match(contentDisposition, @"filename\s*=\s*(?:""(?<file>[^""]+)""|(?<file>[^;]+));?");
+					if (fileNameMatch.Success)
+					{
+						fileName = fileNameMatch.Groups["file"].Value;
+						fileName = WebUtility.UrlDecode(fileName);
+					}
+				}
+				if (fileName == null)
+				{
+					var fileType = Regex.Match(request.ContentType, @"^image/(?<extension>[a-z0-9]+)").Groups["extension"].Value;
+					fileName = $"media{DateTime.UtcNow.ToFileTimeUtc().ToString("x")}";
+					switch (fileType)
+					{
+						case "jpeg": 
+							fileName = fileName + ".jpg"; 
+							break;
+						default:
+							fileName = fileName + fileType;
+							break;
+					}
+				}
+
+				var bufferedStream = new MemoryStream();
+				request.Body.CopyToAsync(bufferedStream).GetAwaiter().GetResult();
+				bufferedStream.Position = 0;
+				var fullImageUrl = binaryManager.SaveFile(bufferedStream, Path.GetFileName(fileName));
+				var imageUrl = dasBlogSettings.RelativeToRoot(fullImageUrl);
+				entry.Attachments.Add(new Attachment(fileName, request.ContentType, 0, AttachmentType.Picture) { Url = imageUrl });
+
+				entry.Content = string.Format("<p><img border=\"0\" src=\"{0}\"></p>", imageUrl);
+			}
+			else
+			{
+				entry.Content = (new StreamReader(request.Body).ReadToEndAsync()).GetAwaiter().GetResult();
+			}
+
+			if (tags.Length > 0)
+			{
+				entry.Content += $"<p>{tags}</p>";
+			}
+
+			var sts = blogManager.CreateEntry(entry);
+			if (sts != NBR.EntrySaveState.Added)
+			{
+				return new BadRequestResult();
+			}
+			BreakSiteCache();
+			return new CreatedResult(string.Format("~/post/{0}", entry.EntryId), null);
+		}
+
+		private bool VerifySasToken(string sasToken, string uri, Func<string, byte[]> getKeyForUserName)
+		{
+			var parts = sasToken.Split('&')
+						 .Select(p => p.Split('='))
+						 .ToDictionary(p => p[0], p => p[1]);
+			var keyName = parts["skn"];
+			var expiry = long.Parse(parts["se"]);
+			var signature = parts["sig"];
+			var key = getKeyForUserName(keyName);
+			if ( key == null )
+				return false;
+			if (DateTimeOffset.UtcNow > DateTimeOffset.FromUnixTimeSeconds(expiry))
+				return false;
+			var stringToSign = $"{uri}\n{expiry}";
+			var hmac = new HMACSHA256(key);
+			var computedSignature = Convert.ToBase64String(hmac.ComputeHash(Encoding.Unicode.GetBytes(stringToSign)));
+			return WebUtility.UrlDecode(signature) == computedSignature;
+		}
+
+
 		[HttpPost("post/create")]
 		public IActionResult CreatePost(PostViewModel post, string submit)
 		{
@@ -295,13 +433,13 @@ namespace DasBlog.Web.Controllers
 			}
 			catch (Exception ex)
 			{
-				logger.LogError(new EventDataItem(EventCodes.Error, null, "Blog post create failed: {0}", ex.Message));
+				logger.LogError(new EventDataItem(DasBlog.Services.ActivityLogs.EventCodes.Error, null, "Blog post create failed: {0}", ex.Message));
 				ModelState.AddModelError("", "Failed to edit blog post. Please check Logs for more details.");
 			}
 
 			if (entry != null)
 			{
-				logger.LogInformation(new EventDataItem(EventCodes.EntryAdded, null, "Blog post created: {0}", entry.Title));
+				logger.LogInformation(new EventDataItem(DasBlog.Services.ActivityLogs.EventCodes.EntryAdded, null, "Blog post created: {0}", entry.Title));
 			}
 
 			BreakSiteCache();

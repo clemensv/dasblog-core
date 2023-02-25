@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.IO;
 
 namespace newtelligence.DasBlog.Runtime
@@ -123,9 +124,9 @@ namespace newtelligence.DasBlog.Runtime
                     break;
                 }
 
-                string newFileName = String.Format("{0}[{1}]{2}",
+                string newFileName = String.Format("{0}.{1}.{2}",
                     Path.GetFileNameWithoutExtension(file.Name),
-                    cnt++,
+                    DateTime.UtcNow.ToFileTimeUtc().ToString("h"),
                     file.Extension
                     );
 
@@ -138,6 +139,7 @@ namespace newtelligence.DasBlog.Runtime
                 using (FileStream fs = file.OpenWrite())
                 {
                     CopyStream(inputFile, fs);
+					fs.Flush();
                 }
             }
 

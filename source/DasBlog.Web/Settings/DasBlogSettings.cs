@@ -314,11 +314,14 @@ namespace DasBlog.Web.Settings
 			{
 				link = GetPermaTitle(entry.CompressedTitleUnique);
 			}
-			else
+			else if (SiteConfiguration.EnableTitlePermaLink)
 			{
 				link = GetPermaTitle(entry.CompressedTitle);
 			}
-
+			else
+			{
+				link = GetPermaLinkUrl(entry.EntryId);
+			}
 			return link;
 		}
 

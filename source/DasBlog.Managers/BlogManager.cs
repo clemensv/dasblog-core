@@ -8,6 +8,7 @@ using newtelligence.DasBlog.Runtime;
 using System;
 using System.Linq;
 using DasBlog.Services;
+using System.Net;
 using System.Net.Mail;
 using DasBlog.Core.Extensions;
 using DasBlog.Services.Eventing;
@@ -49,7 +50,7 @@ namespace DasBlog.Managers
 			else
 				{
 					var entries = dataService.GetEntriesForDay(dt.Value, null, null, 1, 10, null);
-					var normalizedTitle = posttitle.Replace(" ", "-");
+					var normalizedTitle = WebUtility.UrlEncode(posttitle.Replace(" ", "-"));
 
 					return entries.FirstOrDefault(e => dasBlogSettings.GeneratePostUrl(e)
 												.EndsWith(normalizedTitle, StringComparison.OrdinalIgnoreCase));

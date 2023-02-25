@@ -147,7 +147,7 @@ namespace DasBlog.Web.Controllers
 									.Select(comment => mapper.Map<CommentViewModel>(comment)).ToList(),
 					PostId = entry.EntryId,
 					PostDate = entry.CreatedUtc,
-					CommentUrl = dasBlogSettings.GetCommentViewUrl(entry.Title),
+					CommentUrl = dasBlogSettings.GetCommentViewUrl(entry.EntryId),
 					ShowComments = dasBlogSettings.SiteConfiguration.ShowCommentsWhenViewingEntry,
 					AllowComments = entry.AllowComments
 				};
@@ -532,7 +532,7 @@ namespace DasBlog.Web.Controllers
 							.Select(comment => mapper.Map<CommentViewModel>(comment)).ToList(),
 						PostId = entry.EntryId,
 						PostDate = entry.CreatedUtc,
-						CommentUrl = dasBlogSettings.GetCommentViewUrl(posttitle),
+						CommentUrl = dasBlogSettings.GetCommentViewUrl(entry.EntryId),
 						ShowComments = true,
 						AllowComments = entry.AllowComments
 					};
@@ -583,9 +583,9 @@ namespace DasBlog.Web.Controllers
 
 
 
-		private IActionResult Comment(string posttitle)
+		private IActionResult Comment(string entryId)
 		{
-			return Comment(posttitle, string.Empty, string.Empty, string.Empty);
+			return Comment(entryId, string.Empty, string.Empty, string.Empty);
 		}
 
 		[AllowAnonymous]
@@ -940,11 +940,14 @@ namespace DasBlog.Web.Controllers
 			}
 
 			var dt = ValidatePostDate(post);
-			var entry = blogManager.GetBlogPost(post.Title.Replace(" ", string.Empty), dt);
-
-			if (entry != null && string.Compare(entry.EntryId, post.EntryId, true) > 0)
+			if (!string.IsNullOrEmpty(post.Title))
 			{
-				ModelState.AddModelError(string.Empty, "A post with this title already exists. Titles must be unique");
+				var entry = blogManager.GetBlogPost(post.Title.Replace(" ", string.Empty), dt);
+
+				if (entry != null && string.Compare(entry.EntryId, post.EntryId, true) > 0)
+				{
+					ModelState.AddModelError(string.Empty, "A post with this title already exists. Titles must be unique");
+				}
 			}
 		}
 

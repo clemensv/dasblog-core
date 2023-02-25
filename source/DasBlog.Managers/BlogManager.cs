@@ -150,7 +150,7 @@ namespace DasBlog.Managers
 
 		private void LogEvent(EventCodes eventCode, Entry entry)
 		{
-			logger.LogInformation(new EventDataItem(eventCode, MakePermaLinkFromCompressedTitle(entry), entry.Title));
+			logger.LogInformation(new EventDataItem(eventCode, new Uri(dasBlogSettings.GetPermaLinkUrl(entry.EntryId)), entry.Title ?? entry.EntryId));
 		}
 
 		private Uri MakePermaLinkFromCompressedTitle(Entry entry)
@@ -173,12 +173,6 @@ namespace DasBlog.Managers
 			// now save the entry, passign in all the necessary Trackback and Pingback info.
 			try
 			{
-				// if the post is missing a title don't publish it
-				if (entry.Title == null || entry.Title.Length == 0)
-				{
-					entry.IsPublic = false;
-				}
-
 				// if the post is missing categories, then set the categories to empty string.
 				if (entry.Categories == null)
 					entry.Categories = "";

@@ -8,8 +8,6 @@ namespace DasBlog.Web.Models.BlogViewModels
 {
 	public partial class PostViewModel
 	{
-		[Required]
-		[MinLength(1)]
 		public string Title { get; set; }
 
 		[DataType(DataType.MultilineText)]

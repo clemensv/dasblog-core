@@ -32,7 +32,7 @@ namespace DasBlog.Web.TagHelpers
 
 			output.Attributes.SetAttribute("href", string.Format(TWITTER_SHARE_URL, 
 								UrlEncoder.Default.Encode(urlResolver.RelativeToRoot(Post.PermaLink)),
-								UrlEncoder.Default.Encode(Post.Title),
+								UrlEncoder.Default.Encode(Post.Title ?? string.Empty),
 								UrlEncoder.Default.Encode(author.TrimStart('@')), 
 								RetrieveFormattedCategories(Post.Categories)));
 

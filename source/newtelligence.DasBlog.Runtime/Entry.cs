@@ -392,7 +392,6 @@ namespace newtelligence.DasBlog.Runtime
 					retVal.Append(c);
 				}
 			}
-
 			return WebUtility.UrlEncode(retVal.ToString()).Replace("%2b", "+", StringComparison.OrdinalIgnoreCase);
 		}
 

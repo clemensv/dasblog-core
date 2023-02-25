@@ -56,15 +56,16 @@ namespace DasBlog.Managers
 			{
 				posttitle = posttitle.Replace(dasBlogSettings.SiteConfiguration.TitlePermalinkSpaceReplacement, string.Empty)
 									.Replace(".aspx", string.Empty);
-
 				return dataService.GetEntry(posttitle);
 			}
 			else
 			{
 				var entries = dataService.GetEntriesForDay(dt.Value, null, null, 1, 10, null);
-
+				// GeneratePostUrl runs UrlEncode over the URL and therefore we have to do the same here to 
+				// make sure we match Umlauts and other characters requiring encoding that occur in titles.
+				var encodedPostTitle = WebUtility.UrlEncode(posttitle);
 				return entries.FirstOrDefault(e => dasBlogSettings.GeneratePostUrl(e)
-											.EndsWith(posttitle, StringComparison.OrdinalIgnoreCase));
+											.EndsWith(encodedPostTitle, StringComparison.OrdinalIgnoreCase));
 			}
 		}
 

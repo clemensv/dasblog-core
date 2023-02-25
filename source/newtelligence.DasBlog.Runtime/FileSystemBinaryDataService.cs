@@ -111,8 +111,6 @@ namespace newtelligence.DasBlog.Runtime
                 throw;
             }
 
-
-            int cnt = 1; // counter to make a unique filename
             bool saveFile = true;
 
             while (file.Exists)
@@ -123,9 +121,9 @@ namespace newtelligence.DasBlog.Runtime
                     break;
                 }
 
-                string newFileName = String.Format("{0}[{1}]{2}",
+                string newFileName = String.Format("{0}.{1}.{2}",
                     Path.GetFileNameWithoutExtension(file.Name),
-                    cnt++,
+                    DateTime.UtcNow.ToFileTimeUtc().ToString("h"),
                     file.Extension
                     );
 
@@ -138,6 +136,7 @@ namespace newtelligence.DasBlog.Runtime
                 using (FileStream fs = file.OpenWrite())
                 {
                     CopyStream(inputFile, fs);
+                    fs.Flush();
                 }
             }
 

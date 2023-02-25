@@ -10,6 +10,7 @@ using newtelligence.DasBlog.Runtime;
 using Microsoft.Extensions.Logging;
 using NodaTime;
 using DasBlog.Services;
+using DasBlog.Services.Eventing;
 using System.Linq;
 
 namespace DasBlog.Tests.UnitTests.Managers
@@ -20,6 +21,7 @@ namespace DasBlog.Tests.UnitTests.Managers
         private Mock<ISiteConfig> siteConfigMock;
         private Mock<ILogger<BlogManager>> loggerMock;
         private Mock<IBlogDataService> dataServiceMock;
+        private Mock<ICloudEventsSource> cloudEventsSourceMock;
 
         public BlogManagerTest()
         {
@@ -41,6 +43,7 @@ namespace DasBlog.Tests.UnitTests.Managers
 
             loggerMock = new Mock<ILogger<BlogManager>>();
             dataServiceMock = new Mock<IBlogDataService>();
+            cloudEventsSourceMock = new Mock<ICloudEventsSource>();
 
             var mesurabilityEntry = new Entry
             {
@@ -74,7 +77,7 @@ namespace DasBlog.Tests.UnitTests.Managers
 
         private BlogManager CreateManager()
         {
-            return new BlogManager(loggerMock.Object, settingsMock.Object, dataServiceMock.Object);
+            return new BlogManager(loggerMock.Object, settingsMock.Object, dataServiceMock.Object, cloudEventsSourceMock.Object);
         }
 
         [Fact]

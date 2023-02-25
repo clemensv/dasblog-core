@@ -165,7 +165,7 @@ namespace DasBlog.Tests.UnitTests.Services
 		public void BlogDataService_GetEntriesWithFalse_Successful()
 		{
 			BlogDataServiceFactory.RemoveService(UnitTestsConstants.TestContentLocation);				
-			IBlogDataService blogdataservice = BlogDataServiceFactory.GetService(UnitTestsConstants.TestContentLocation,
+			IBlogDataService blogdataservice = BlogDataServiceFactory.GetService(UnitTestsConstants.TestContentLocation, (s)=>s,
 			  LoggingDataServiceFactory.GetService(UnitTestsConstants.TestLoggingLocation));
 			// gets both public and non-public
 			var entries = blogdataservice.GetEntries(false);
@@ -174,7 +174,7 @@ namespace DasBlog.Tests.UnitTests.Services
 
 		public static TheoryData<IBlogDataService> DasBlogDataService = new TheoryData<IBlogDataService>
 		{
-			BlogDataServiceFactory.GetService(UnitTestsConstants.TestContentLocation, LoggingDataServiceFactory.GetService(UnitTestsConstants.TestLoggingLocation))
+			BlogDataServiceFactory.GetService(UnitTestsConstants.TestContentLocation, (s)=>s, LoggingDataServiceFactory.GetService(UnitTestsConstants.TestLoggingLocation))
 		};
 	}
 }

@@ -54,7 +54,8 @@ namespace DasBlog.Web
 				{
 					var paths = sp.GetRequiredService<IDasBlogPathResolver>();
 					var loggingService = sp.GetRequiredService<ILoggingDataService>();
-					return BlogDataServiceFactory.GetService(paths.ContentFolderPath, loggingService);
+					var settings = sp.GetRequiredService<IDasBlogSettings>();
+					return BlogDataServiceFactory.GetService(paths.ContentFolderPath, settings.RelativeToRoot, loggingService);
 				});
 
 			return services;

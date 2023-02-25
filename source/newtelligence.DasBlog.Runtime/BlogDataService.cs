@@ -537,9 +537,22 @@ namespace newtelligence.DasBlog.Runtime
             {
                 day.Load(data);
 
+				Entry today = new Entry();
+				today.Title = day.DateUtc.ToString("d");
+				today.Content = string.Empty;
+				today.EntryId = string.Empty;
+
                 foreach (Entry entry in day.GetEntries(entryCriteria))
                 {
-                    if (entryCount < maxEntries)
+					if (string.IsNullOrEmpty(entry.Title))
+					{
+						string content = !string.IsNullOrEmpty(entry.Content)?entry.Content:(!string.IsNullOrEmpty(entry.Description)?entry.Description:string.Empty);
+						if ( !string.IsNullOrEmpty(content))
+						{
+							today.Content += $"<a style=\"display:block;float:left;margin-right:2ch\" href=\"post/{entry.EntryId}\">#</a>" + content;
+						}
+					}
+					else if (entryCount < maxEntries)
                     {
                         entries.Add(entry);
                         entryCount++;
@@ -549,6 +562,12 @@ namespace newtelligence.DasBlog.Runtime
                         break;
                     }
                 }
+
+				if ( today.Content.Length > 0 )
+				{
+					entries.Add(today);
+				}
+
                 if (entryCount >= maxEntries)
                 {
                     break;
@@ -598,7 +617,7 @@ namespace newtelligence.DasBlog.Runtime
 
             // HACK AG AddDays(1) removed to prevent showing entries after the selected date.
             entries = GetEntries(
-                DayEntryCollectionFilter.DefaultFilters.OccursBefore(startDateUtc.Date),
+                DayEntryCollectionFilter.DefaultFilters.OccursBefore(startDateUtc.Date.AddDays(1)),
                 entryCriteria,
                 maxDays, maxEntries);
 

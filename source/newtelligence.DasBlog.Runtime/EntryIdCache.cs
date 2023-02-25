@@ -1,4 +1,4 @@
-#region Copyright (c) 2003, newtelligence AG. All rights reserved.
+﻿#region Copyright (c) 2003, newtelligence AG. All rights reserved.
 /*
 // Copyright (c) 2003, newtelligence AG. (http://www.newtelligence.com)
 // Original BlogX Source Code: Copyright (c) 2003, Chris Anderson (http://simplegeek.com)
@@ -154,11 +154,14 @@ namespace newtelligence.DasBlog.Runtime
                         //SDH: Only the first title is kept, in case of duplicates
                         // TODO: should be able to fix this, but it's a bunch of work.
                         string compressedTitle = copy.CompressedTitle;
-                        compressedTitle = compressedTitle.Replace("+", "");
-                        if (compressedTitleToDateCopy.ContainsKey(compressedTitle) == false)
-                        {
-                            compressedTitleToDateCopy.Add(compressedTitle, copy.CreatedUtc.Date);
-                        }
+						if (compressedTitle != null)
+						{
+							compressedTitle = compressedTitle.Replace("+", "");
+							if (compressedTitleToDateCopy.ContainsKey(compressedTitle) == false)
+							{
+								compressedTitleToDateCopy.Add(compressedTitle, copy.CreatedUtc.Date);
+							}
+						}
                     }
                 }
             }

@@ -56,7 +56,6 @@
     <Content Remove="Config\meta.config" />
     <Content Remove="Config\meta.Development.config" />
     <Content Remove="Config\oembed-providers.json" />
-    <Content Remove="Config\site.Production.config" />
     <None Remove="Config\siteSecurity.Development.config" />
     <None Include="logs\logs.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

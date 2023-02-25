@@ -86,18 +86,6 @@ namespace newtelligence.DasBlog.Runtime
 		{
 			get
 			{
-				if (_title == null || _title.Length == 0)
-				{
-					//Some imported/corrupted posts may not have a title...glean one in this last ditch effort
-					_title = ClipString(Content, 128);
-					_compressedTitle = InternalCompressTitle(_title);
-					_title = _compressedTitle.Replace("+", " ");
-
-					if (_compressedTitle == null || _compressedTitle.Length == 0)
-					{
-						_title = "No Title";
-					}
-				}
 				return _title;
 			}
 			set

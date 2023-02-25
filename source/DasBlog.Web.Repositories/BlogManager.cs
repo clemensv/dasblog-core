@@ -274,7 +274,7 @@ namespace DasBlog.Managers
 
 		private void LogEvent(EventCodes eventCode, Entry entry)
 		{
-			logger.LogInformation(new EventDataItem(eventCode, new Uri(dasBlogSettings.GetPermaLinkUrl(entry.EntryId)), entry.Title));
+			logger.LogInformation(new EventDataItem(eventCode, new Uri(dasBlogSettings.GetPermaLinkUrl(entry.EntryId)), entry.Title??entry.EntryId));
 		}
 
 		private EntrySaveState InternalSaveEntry(Entry entry, TrackbackInfoCollection trackbackList, CrosspostInfoCollection crosspostList)

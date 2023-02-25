@@ -46,7 +46,7 @@ namespace DasBlog.Managers
 			this.logger = logger;
 
 			var loggingDataService = LoggingDataServiceFactory.GetService(Path.Combine(dasBlogSettings.WebRootDirectory, dasBlogSettings.SiteConfiguration.LogDir));;
-			dataService = BlogDataServiceFactory.GetService(Path.Combine(dasBlogSettings.WebRootDirectory, dasBlogSettings.SiteConfiguration.ContentDir), loggingDataService);
+			dataService = BlogDataServiceFactory.GetService(Path.Combine(dasBlogSettings.WebRootDirectory, dasBlogSettings.SiteConfiguration.ContentDir), dasBlogSettings.RelativeToRoot, loggingDataService);
 		}
 
 		/// <param name="dt">if non-null then the post must be dated on that date</param>

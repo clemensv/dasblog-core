@@ -71,7 +71,7 @@ namespace DasBlog.Managers
 			this.binaryManager = binaryManager;
 
 			loggingDataService = LoggingDataServiceFactory.GetService(Path.Combine(dasBlogSettings.WebRootDirectory, dasBlogSettings.SiteConfiguration.LogDir));
-			dataService = BlogDataServiceFactory.GetService(Path.Combine(dasBlogSettings.WebRootDirectory, dasBlogSettings.SiteConfiguration.ContentDir), loggingDataService);
+			dataService = BlogDataServiceFactory.GetService(Path.Combine(dasBlogSettings.WebRootDirectory, dasBlogSettings.SiteConfiguration.ContentDir), dasBlogSettings.RelativeToRoot, loggingDataService);
 		}
 
 		public string Invoke(Stream requestStream)

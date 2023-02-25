@@ -27,7 +27,7 @@ namespace DasBlog.Managers
 			dasBlogSettings = settings;
 
 			var loggingDataService = LoggingDataServiceFactory.GetService(Path.Combine(dasBlogSettings.WebRootDirectory, dasBlogSettings.SiteConfiguration.LogDir));
-			dataService = BlogDataServiceFactory.GetService(Path.Combine(dasBlogSettings.WebRootDirectory, dasBlogSettings.SiteConfiguration.ContentDir), loggingDataService);
+			dataService = BlogDataServiceFactory.GetService(Path.Combine(dasBlogSettings.WebRootDirectory, dasBlogSettings.SiteConfiguration.ContentDir), dasBlogSettings.RelativeToRoot, loggingDataService);
 
 			var userrelative = string.Format("users/{0}/outbox", dasBlogSettings.SiteConfiguration.MastodonAccount);
 			var actorrelative = string.Format("users/{0}", dasBlogSettings.SiteConfiguration.MastodonAccount);

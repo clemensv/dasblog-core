@@ -63,7 +63,7 @@ namespace newtelligence.DasBlog.Runtime
         /// </summary>
         /// <param name="contentLocation"></param>
         /// <returns></returns>
-        public static IBlogDataService GetService(string contentLocation, ILoggingDataService loggingService)
+        public static IBlogDataService GetService(string contentLocation, Func<string, string> makePathRelativeToRoot, ILoggingDataService loggingService)
         {
             IBlogDataService service;
 
@@ -72,7 +72,7 @@ namespace newtelligence.DasBlog.Runtime
                 service = services[contentLocation.ToUpper()] as IBlogDataService;
                 if (service == null)
                 {
-                    service = new BlogDataServiceXml(contentLocation, loggingService);
+                    service = new BlogDataServiceXml(contentLocation, makePathRelativeToRoot, loggingService);
                     services.Add(contentLocation.ToUpper(), service);
                 }
             }
@@ -97,7 +97,8 @@ namespace newtelligence.DasBlog.Runtime
     internal class BlogDataServiceXml : IBlogDataService
     {
         private string contentBaseDirectory;
-        private DataManager data;
+		private readonly Func<string, string> makePathRelativeToRoot;
+		private DataManager data;
         private AutoResetEvent trackingQueueEvent;
         private Queue trackingQueue;
         private Thread trackingHandlerThread;
@@ -129,10 +130,11 @@ namespace newtelligence.DasBlog.Runtime
         /// </summary>
         /// <param name="contentLocation">The path of the content directory</param>
         /// <param name="loggingService">The <see cref="ILoggingDataService"/></param>
-        internal BlogDataServiceXml(string contentLocation, ILoggingDataService loggingService)
+        internal BlogDataServiceXml(string contentLocation, Func<string, string> makePathRelativeToRoot, ILoggingDataService loggingService)
         {
             contentBaseDirectory = contentLocation;
-            this.loggingService = loggingService;
+			this.makePathRelativeToRoot = makePathRelativeToRoot;
+			this.loggingService = loggingService;
             if (!Directory.Exists(contentBaseDirectory))
             {
                 throw new ArgumentException(
@@ -540,8 +542,10 @@ namespace newtelligence.DasBlog.Runtime
 				Entry today = new Entry();
 				today.Title = day.DateUtc.ToString("d");
 				today.Content = string.Empty;
-				today.EntryId = string.Empty;
-
+				today.EntryId = Guid.NewGuid().ToString();
+				today.CreatedUtc = day.DateUtc;
+				today.ModifiedUtc = day.DateUtc;
+				
                 foreach (Entry entry in day.GetEntries(entryCriteria))
                 {
 					if (string.IsNullOrEmpty(entry.Title))
@@ -549,7 +553,7 @@ namespace newtelligence.DasBlog.Runtime
 						string content = !string.IsNullOrEmpty(entry.Content)?entry.Content:(!string.IsNullOrEmpty(entry.Description)?entry.Description:string.Empty);
 						if ( !string.IsNullOrEmpty(content))
 						{
-							today.Content += $"<a style=\"display:block;float:left;margin-right:2ch\" href=\"post/{entry.EntryId}\">#</a>" + content;
+							today.Content += $"<div class=\"dasblog-dayentry\"><a style=\"margin-right:2ch\" href=\"{makePathRelativeToRoot($"post/{entry.EntryId}")}\">#</a>" + content + "</div>";
 						}
 					}
 					else if (entryCount < maxEntries)

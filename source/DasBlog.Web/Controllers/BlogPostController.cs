@@ -336,7 +336,7 @@ namespace DasBlog.Web.Controllers
 			string title = string.Empty;
 			if (request.Headers.TryGetValue("Title", out var titles))
 			{
-				title = titles[0];
+				title = WebUtility.UrlDecode(titles[0]);
 			}
 
 			Entry entry = new Entry();
@@ -344,7 +344,8 @@ namespace DasBlog.Web.Controllers
 			entry.Title = title;
 			entry.Author = tokenUsername;
 			entry.IsPublic = true;
-
+			entry.AllowComments = true;
+			
 			string tags = string.Empty;
 			if (!string.IsNullOrEmpty(entry.Title))
 			{

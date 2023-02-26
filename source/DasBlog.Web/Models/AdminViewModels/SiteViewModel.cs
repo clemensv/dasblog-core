@@ -300,6 +300,9 @@ namespace DasBlog.Web.Models.AdminViewModels
 		public string ProfilesDir { get; set; }
 		public string BinariesDirRelative { get; set; }
 		public bool EnableTitlePermaLink { get; set; }
+		public bool EnableRewritingHashtagsToCategoryLinks { get; set; }
+		public bool EnableRewritingBareLinksToEmbeddings { get; set; }
+		public bool EnableRewritingBareLinksToIcons { get; set; }
 		public bool EnableTitlePermaLinkSpaces { get; set; }
 		public string RssLanguage { get; set; }
 		public bool EnableSearchHighlight { get; set; }

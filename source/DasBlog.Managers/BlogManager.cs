@@ -49,7 +49,7 @@ namespace DasBlog.Managers
 			}
 			else
 				{
-					var entries = dataService.GetEntriesForDay(dt.Value, dasBlogSettings.GetConfiguredTimeZone(), null, 1, 10, null);
+					var entries = dataService.GetEntriesForDay(dt.Value, dasBlogSettings.GetConfiguredTimeZone(), null, 2, 10, null);
 					var normalizedTitle = WebUtility.UrlEncode(posttitle.Replace(" ", "-"));
 
 					return entries.FirstOrDefault(e => dasBlogSettings.GeneratePostUrl(e)
@@ -213,6 +213,11 @@ namespace DasBlog.Managers
 		public Entry GetVirtualBlogPostForDay(DateTime postDay)
 		{
 			return dataService.GetVirtualEntryForDay(postDay);
+		}
+
+		public void ResetCaches()
+		{
+			dataService.ResetCaches();
 		}
 
 		public CategoryCacheEntryCollection GetCategories()

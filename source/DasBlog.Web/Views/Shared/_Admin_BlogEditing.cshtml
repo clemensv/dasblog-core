@@ -51,6 +51,25 @@
     </div>
 </div>
 
+<div class="row gy-2 gx-3 align-items-md-start mb-3">
+    <div class="col-sm-6">
+        @Html.CheckBoxFor(m => m.SiteConfig.EnableRewritingBareLinksToEmbeddings, new { @class = "form-check-input" })
+        @Html.LabelFor(m => m.SiteConfig.EnableRewritingBareLinksToEmbeddings, null, new { @class = "col-check-label" })
+    </div>
+    <div class="col-sm-6">
+        @Html.CheckBoxFor(m => m.SiteConfig.EnableRewritingBareLinksToIcons, new { @class = "form-check-input" })
+        @Html.LabelFor(m => m.SiteConfig.EnableRewritingBareLinksToIcons, null, new { @class = "col-check-label" })
+    </div>
+    <div class="col-sm-6">
+        @Html.CheckBoxFor(m => m.SiteConfig.EnableRewritingHashtagsToCategoryLinks, new { @class = "form-check-input" })
+        @Html.LabelFor(m => m.SiteConfig.EnableRewritingHashtagsToCategoryLinks, null, new { @class = "col-check-label" })
+    </div>
+    <div class="col-sm-6">
+        @Html.CheckBoxFor(m => m.SiteConfig.EnableTitlePermaLink, new { @class = "form-check-input" })
+        @Html.LabelFor(m => m.SiteConfig.EnableTitlePermaLink, null, new { @class = "col-check-label" })
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const enableBloggerApiCheckbox = document.querySelector('[id$="EnableBloggerApi"]');

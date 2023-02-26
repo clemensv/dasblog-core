@@ -94,6 +94,8 @@ namespace DasBlog.Web.Controllers
 			var meta = mapper.Map<MetaTags>(settings.MetaConfig);
 
 			site.SpamBlockingService = dasBlogSettings.SiteConfiguration.SpamBlockingService;
+			site.CloudEventsTargetArray = dasBlogSettings.SiteConfiguration.CloudEventsTargetArray;
+			site.CloudEventsTargets = dasBlogSettings.SiteConfiguration.CloudEventsTargets;
 
 			// Preserve existing SMTP password if user didn't enter a new one
 			// (password fields don't populate their values for security reasons)
@@ -135,6 +137,8 @@ namespace DasBlog.Web.Controllers
 				settings.Posts = posts;
 				return View("Settings", settings);
 			}
+
+			BreakSiteCache();
 
 			logger.LogInformation(new EventDataItem(EventCodes.Site, null, "Site settings updated"));
 
@@ -295,6 +299,7 @@ namespace DasBlog.Web.Controllers
 
 		private void BreakSiteCache()
 		{
+			blogManager.ResetCaches();
 			memoryCache.Remove(CACHEKEY_RSS);
 			memoryCache.Remove(CACHEKEY_FRONTPAGE);
 			memoryCache.Remove(CACHEKEY_ARCHIVE);

@@ -39,7 +39,8 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Data;
+using System.Threading;
 
 namespace newtelligence.DasBlog.Runtime
 {
@@ -55,26 +56,16 @@ namespace newtelligence.DasBlog.Runtime
         }
 
         // storage
-        private EntryCollection entriesCache;
-        private Dictionary<string, DateTime> entryIDToDate = new Dictionary<string, DateTime>(StringComparer.InvariantCultureIgnoreCase);
-        private Dictionary<string, DateTime> compressedTitleToDate = new Dictionary<string, DateTime>(StringComparer.InvariantCultureIgnoreCase);
+        private EntryCollection _entriesCache;
+        private Dictionary<string, DateTime> _entryIDToDateIndex = new Dictionary<string, DateTime>(StringComparer.InvariantCultureIgnoreCase);
+        private Dictionary<string, DateTime> _compressedTitleToDateIndex = new Dictionary<string, DateTime>(StringComparer.InvariantCultureIgnoreCase);
 
         // used for synchronisation
         private static object entriesLock = new object();
-        private bool booting = true;
-
         // used for versioning the cache
-        private long changeNumber;
-
-        /// <summary>
-        /// The CurrentEntryChangeCount from the datamanager, 
-        /// when we build the cache.
-        /// </summary>
-        public long ChangeNumber { get { return changeNumber; } }
-
-        // the instance
+        private long buildEpoch;
+        // singleton instance of the cache
         private static EntryIdCache instance = new EntryIdCache();
-
 
         /// <summary>
         /// Gets the instance of the EntryIdCache.
@@ -83,12 +74,7 @@ namespace newtelligence.DasBlog.Runtime
         /// <returns>The instance.</returns>
         public static EntryIdCache GetInstance(DataManager data)
         {
-
-            //  handles the thread safe loading,
-            // can't be moved to the constructor,
-            // because a change in the 'CurrentEntryChangeCount' will force a rebuild
-            instance.Ensure(data);
-
+			instance.LoadIfRequired(data);
             return instance;
         }
 
@@ -99,100 +85,71 @@ namespace newtelligence.DasBlog.Runtime
         /// <returns></returns>
         public EntryCollection GetEntries()
         {
-
-            return (EntryCollection)entriesCache.Clone();
+            return (EntryCollection)_entriesCache.Clone();
         }
 
-        private void Ensure(DataManager data)
+        private void LoadIfRequired(DataManager data)
         {
-
-            if (!Loaded || booting || changeNumber != data.CurrentEntryChangeCount)
+			if (!IsCacheLoaded || buildEpoch != data.CurrentEntryEpoch)
             {
                 lock (entriesLock)
                 {
-                    if (!Loaded || booting || changeNumber != data.CurrentEntryChangeCount)
-                    {
-                        if (Build(data))
-                        {
-                            // if we succesfully build, we're no longer booting
-                            booting = false;
-                        }
-                    }
-                }
-            }
-        }
+					if (!IsCacheLoaded || buildEpoch != data.CurrentEntryEpoch)
+					{
+						EntryCollection entriesCacheCopy = new EntryCollection();
+						Dictionary<string, DateTime> entryIdToDateCopy = new Dictionary<string, DateTime>(StringComparer.InvariantCultureIgnoreCase);
+						Dictionary<string, DateTime> compressedTitleToDateCopy = new Dictionary<string, DateTime>(StringComparer.InvariantCultureIgnoreCase);
 
-        private bool Build(DataManager data)
-        {
-
-            EntryCollection entriesCacheCopy = new EntryCollection();
-
-            Dictionary<string, DateTime> entryIdToDateCopy = new Dictionary<string, DateTime>(StringComparer.InvariantCultureIgnoreCase);
-            Dictionary<string, DateTime> compressedTitleToDateCopy = new Dictionary<string, DateTime>(StringComparer.InvariantCultureIgnoreCase);
-
-            try
-            {
-                foreach (DayEntry day in data.Days)
-                {
-                    day.Load(data);
-
-                    foreach (Entry entry in day.Entries)
-                    {
-
-                        // create a lite entry for faster searching 
-                        Entry copy = entry.Clone();
-                        copy.Content = "";
-                        copy.Description = "";
-
-                        copy.AttachmentsArray = null;
-                        copy.CrosspostArray = null;
-
-                        entriesCacheCopy.Add(copy);
-
-                        entryIdToDateCopy.Add(copy.EntryId, copy.CreatedUtc.Date);
-
-                        //SDH: Only the first title is kept, in case of duplicates
-                        // TODO: should be able to fix this, but it's a bunch of work.
-                        string compressedTitle = copy.CompressedTitle;
-						if (compressedTitle != null)
+						foreach (DayEntry day in data.Days)
 						{
-							compressedTitle = compressedTitle.Replace("+", "");
-							if (compressedTitleToDateCopy.ContainsKey(compressedTitle) == false)
+							day.LoadIfRequired(data);
+
+							foreach (Entry entry in day.Entries)
 							{
-								compressedTitleToDateCopy.Add(compressedTitle, copy.CreatedUtc.Date);
+								// create a lite entry for faster searching 
+								Entry copy = entry.Clone();
+								copy.Content = "";
+								copy.Description = "";
+								copy.AttachmentsArray = null;
+								entriesCacheCopy.Add(copy);
+
+								entryIdToDateCopy.Add(copy.EntryId, copy.CreatedUtc.Date);
+
+								//SDH: Only the first title is kept, in case of duplicates
+								// TODO: should be able to fix this, but it's a bunch of work.
+								string compressedTitle = copy.CompressedTitle;
+								if (compressedTitle != null)
+								{
+									compressedTitle = compressedTitle.Replace("+", "");
+									if (compressedTitleToDateCopy.ContainsKey(compressedTitle) == false)
+									{
+										compressedTitleToDateCopy.Add(compressedTitle, copy.CreatedUtc.Date);
+									}
+								}
 							}
 						}
-                    }
+
+						// set buildEpoch 
+						buildEpoch = data.CurrentEntryEpoch;
+
+						// swap the caches and clear the old ones
+						var oldIndex = _entryIDToDateIndex;
+						_entryIDToDateIndex = entryIdToDateCopy;
+						if (oldIndex != null ) { oldIndex.Clear(); } // clear the cache
+						var oldIndex2 = _compressedTitleToDateIndex;
+						_compressedTitleToDateIndex = compressedTitleToDateCopy;
+						if (oldIndex2 != null) { oldIndex2.Clear(); } // clear the cache
+						var oldIndex3 = _entriesCache;
+						_entriesCache = entriesCacheCopy;
+						if (oldIndex3 != null) { oldIndex3.Clear(); }// clear the cache
+					}
                 }
             }
-
-                //TODO: SDH: Temporary, as sometimes we get collection was modified from the EntryCollection...why does this happen? "Database" corruption? 
-            // Misaligned Entries?
-            catch (InvalidOperationException) //something wrong enumerating the entries?
-            {
-                //set flags to start over to prevent getting stuck...
-                booting = true;
-                changeNumber = 0;
-                throw;
-            }
-
-            //try to be a little more "Atomic" as others have been enumerating this list...
-            entryIDToDate.Clear();
-            entryIDToDate = entryIdToDateCopy;
-
-            compressedTitleToDate.Clear();
-            compressedTitleToDate = compressedTitleToDateCopy;
-
-            entriesCache = entriesCacheCopy;
-
-            changeNumber = data.CurrentEntryChangeCount;
-
-            return true;
         }
 
         internal string GetTitleFromEntryId(string entryid)
         {
-            Entry retVal = entriesCache[entryid];
+            Entry retVal = _entriesCache[entryid];
             if (retVal == null)
             {
                 return null;
@@ -204,7 +161,7 @@ namespace newtelligence.DasBlog.Runtime
         {
             DateTime retVal;
 
-            if (entryIDToDate.TryGetValue(entryid, out retVal))
+            if (_entryIDToDateIndex.TryGetValue(entryid, out retVal))
             {
                 return retVal;
             }
@@ -216,7 +173,7 @@ namespace newtelligence.DasBlog.Runtime
         {
             DateTime retVal;
 
-            if (compressedTitleToDate.TryGetValue(title, out retVal))
+            if (_compressedTitleToDateIndex.TryGetValue(title, out retVal))
             {
                 return retVal;
             }
@@ -224,16 +181,11 @@ namespace newtelligence.DasBlog.Runtime
             return DateTime.MinValue;
         }
 
-        private bool Loaded
+        private bool IsCacheLoaded
         {
             get
             {
-                //return true if we are loaded
-                if (entriesCache == null)
-                {
-                    return false;
-                }
-                return true;
+				return _entriesCache != null;
             }
         }
     }

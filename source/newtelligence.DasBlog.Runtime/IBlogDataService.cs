@@ -249,5 +249,7 @@ namespace newtelligence.DasBlog.Runtime
 		DateTime GetLastCommentUpdate();
 
 		StaticPage GetStaticPage( string pagename );
+		Entry GetVirtualEntryForDay(DateTime postDay);
+		Entry GetEntryByTitle(string posttitle);
 	}
 }

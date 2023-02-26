@@ -42,7 +42,7 @@ namespace DasBlog.Web.Controllers
 		[HttpGet("")]
 		public IActionResult Archive()
 		{
-			return Archive(DateTime.Now.Year, DateTime.Now.Month);
+			return Archive(DateTime.UtcNow.Year, DateTime.UtcNow.Month);
 		}
 
 		[HttpGet("{year}")]

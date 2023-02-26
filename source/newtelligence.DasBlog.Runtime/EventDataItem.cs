@@ -53,7 +53,7 @@ namespace newtelligence.DasBlog.Runtime
 
         public EventDataItem()
         {
-            EventTimeUtc = DateTime.Now.ToUniversalTime();
+            EventTimeUtc = DateTime.UtcNow;
             HtmlMessage = "";
             EventCode = 0;
         }
@@ -65,7 +65,7 @@ namespace newtelligence.DasBlog.Runtime
 			remoteUrl = LogEncoder.Encode(remoteUrl);
 			userMessage = LogEncoder.EncodeBadTags(userMessage);
 
-			EventTimeUtc = DateTime.Now.ToUniversalTime();
+			EventTimeUtc = DateTime.UtcNow;
 			HtmlMessage = EventMessageTemplates.FormatMessage( eventCode, userMessage, localUrl, remoteUrl, title );
 			EventCode = Convert.ToInt32(eventCode);
 		}
@@ -77,7 +77,7 @@ namespace newtelligence.DasBlog.Runtime
 			remoteUrl = LogEncoder.Encode(remoteUrl);
 			userMessage = LogEncoder.Encode(userMessage);
 
-			EventTimeUtc = DateTime.Now.ToUniversalTime();
+			EventTimeUtc = DateTime.UtcNow;
 			HtmlMessage = EventMessageTemplates.FormatMessage( eventCode, userMessage, localUrl, remoteUrl );
 			EventCode = Convert.ToInt32(eventCode);
 		}
@@ -87,7 +87,7 @@ namespace newtelligence.DasBlog.Runtime
 			// http://www.net-security.org/vuln.php?id=3680
 			localUrl = LogEncoder.Encode(localUrl);
 
-            EventTimeUtc = DateTime.Now.ToUniversalTime();
+            EventTimeUtc = DateTime.UtcNow;
             HtmlMessage = EventMessageTemplates.FormatMessage( eventCode, userMessage, localUrl );
             EventCode = Convert.ToInt32(eventCode);
         }

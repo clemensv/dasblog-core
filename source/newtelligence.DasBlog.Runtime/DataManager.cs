@@ -1,4 +1,4 @@
-#region Copyright (c) 2003, newtelligence AG. All rights reserved.
+﻿#region Copyright (c) 2003, newtelligence AG. All rights reserved.
 
 /*
 // Copyright (c) 2003, newtelligence AG. (http://www.newtelligence.com)
@@ -43,6 +43,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 
 namespace newtelligence.DasBlog.Runtime
 {
@@ -50,14 +51,11 @@ namespace newtelligence.DasBlog.Runtime
 
 	internal class DataManager
 	{
-//		private static BlogCoreData coreData = null;
-
 		private object syncDays = new Object();
-		private object syncCore = new Object();
 		private DayEntryCollection days;
 
-		private long _entryChangeCount;
-		private long _extraChangeCount;
+		private long _entryEpoch;
+		private long _extraEpoch;
 
 		internal DateTime lastEntryUpdate = DateTime.MinValue;
 		internal DateTime lastCommentUpdate = DateTime.MinValue;
@@ -90,7 +88,6 @@ namespace newtelligence.DasBlog.Runtime
 					if (this.days == null)
 					{
 						// Use Invariant Culture, not host culture (or user override), for date formats.
-
 						DayEntryCollection newEntries = new DayEntryCollection();
 						foreach (FileInfo fi in new DirectoryInfo(ResolvePath(".")).GetFiles("*.dayentry.xml"))
 						{
@@ -110,7 +107,6 @@ namespace newtelligence.DasBlog.Runtime
 						newEntries.Sort(new DaySorter());
 						this.days = newEntries;
 					}
-
 					return new DayEntryCollection(days);  //a shallow copy
 				}
 			}
@@ -124,42 +120,35 @@ namespace newtelligence.DasBlog.Runtime
 			return d;
 		}
 
-		public long CurrentEntryChangeCount
+		public long CurrentEntryEpoch
 		{
 			get
 			{
-				return _entryChangeCount;
+				return _entryEpoch;
 			}
 		}
 
-		public long CurrentExtraChangeCount
+		public long CurrentExtraEpoch
 		{
 			get
 			{
-				return _extraChangeCount;
+				return _extraEpoch;
 			}
 		}
 
-		public void IncrementEntryChange()
+		public void IncrementEntryEpoch()
 		{
+			this.lastEntryUpdate = DateTime.UtcNow;
 			lock (syncDays)
 			{
 				this.days = null;
 			}
-
-			lock (syncCore)
-			{
-				_entryChangeCount++;
-			}
+			Interlocked.Increment( ref _entryEpoch);			
 		}
 
-		public void IncrementExtraChange()
+		public void IncrementExtraEpoch()
 		{
-			lock (syncCore)
-			{
-				_extraChangeCount++;
-			}
+			Interlocked.Increment( ref _extraEpoch);
 		}
-
 	}
 }

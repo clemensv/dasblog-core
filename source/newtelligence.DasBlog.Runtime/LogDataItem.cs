@@ -61,7 +61,7 @@ namespace newtelligence.DasBlog.Runtime
 
         public LogDataItem( string urlRequested, string urlReferrer, string userAgent, string userDomain )
         {
-            RequestedUtc = DateTime.Now.ToUniversalTime();
+            RequestedUtc = DateTime.UtcNow;
             UrlRequested = urlRequested;
             UrlReferrer = urlReferrer;
             UserAgent = userAgent;

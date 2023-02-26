@@ -41,15 +41,15 @@ namespace DasBlog.Managers
 
 			if (dt == null)
 				{
-					posttitle = posttitle.Replace("-", string.Empty)
+					posttitle = posttitle.Replace(dasBlogSettings.SiteConfiguration.TitlePermalinkSpaceReplacement, string.Empty)
 														.Replace(" ", string.Empty)
 														.Replace(".aspx", string.Empty);
 
-				return dataService.GetEntry(posttitle);
+				return dataService.GetEntryByTitle(posttitle);
 			}
 			else
 				{
-					var entries = dataService.GetEntriesForDay(dt.Value, null, null, 1, 10, null);
+					var entries = dataService.GetEntriesForDay(dt.Value, dasBlogSettings.GetConfiguredTimeZone(), null, 1, 10, null);
 					var normalizedTitle = WebUtility.UrlEncode(posttitle.Replace(" ", "-"));
 
 					return entries.FirstOrDefault(e => dasBlogSettings.GeneratePostUrl(e)
@@ -120,7 +120,7 @@ namespace DasBlog.Managers
 		
 		public EntrySaveState CreateEntry(Entry entry)
 		{
-			var rtn = InternalSaveEntry(entry, null, null);
+			var rtn = InternalSaveEntry(entry, null);
 			LogEvent(EventCodes.EntryAdded, entry);
 			_ = cloudEventsSource.RaisePostCreatedCloudEventAsync(entry);
 			return rtn;
@@ -128,7 +128,7 @@ namespace DasBlog.Managers
 
 		public EntrySaveState UpdateEntry(Entry entry)
 		{
-			var rtn = InternalSaveEntry(entry, null, null);
+			var rtn = InternalSaveEntry(entry, null);
 			LogEvent(EventCodes.EntryChanged, entry);
 			_ = cloudEventsSource.RaisePostUpdatedCloudEventAsync(entry);
 			return rtn;
@@ -165,7 +165,7 @@ namespace DasBlog.Managers
 			}
 		}
 
-		private EntrySaveState InternalSaveEntry(Entry entry, TrackbackInfoCollection trackbackList, CrosspostInfoCollection crosspostList)
+		private EntrySaveState InternalSaveEntry(Entry entry, TrackbackInfoCollection trackbackList)
 		{
 
 			EntrySaveState rtn = EntrySaveState.Failed;
@@ -188,8 +188,7 @@ namespace DasBlog.Managers
 				}
 				entry.Categories = entry.Categories.TrimStart(';');
 
-				rtn = dataService.SaveEntry(entry, entry.IsPublic
-											? trackbackList : null, crosspostList);
+				rtn = dataService.SaveEntry(entry, entry.IsPublic ? trackbackList : null);
 
 				//TODO: SendEmail(entry, siteConfig, logService);
 			}
@@ -201,7 +200,7 @@ namespace DasBlog.Managers
 
 				LoggedException le = new LoggedException("file failure", ex);
 
-				var edi = new EventDataItem(EventCodes.Error, null, "Failed to Save a Post on {date}", DateTime.Now.ToShortDateString());
+				var edi = new EventDataItem(EventCodes.Error, null, "Failed to Save a Post on {date}", DateTime.UtcNow.ToShortDateString());
 				logger.LogError(edi,le);
 			}
 
@@ -209,6 +208,11 @@ namespace DasBlog.Managers
 			// BreakCache(entry.GetSplitCategories());
 
 			return rtn;
+		}
+
+		public Entry GetVirtualBlogPostForDay(DateTime postDay)
+		{
+			return dataService.GetVirtualEntryForDay(postDay);
 		}
 
 		public CategoryCacheEntryCollection GetCategories()

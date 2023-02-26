@@ -28,5 +28,6 @@ namespace DasBlog.Managers.Interfaces
 		CategoryCacheEntryCollection GetCategories();
 
 		bool SendTestEmail();
+		Entry GetVirtualBlogPostForDay(DateTime postDay);
 	}
 }

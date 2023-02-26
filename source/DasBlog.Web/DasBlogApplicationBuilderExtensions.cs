@@ -106,6 +106,11 @@ namespace DasBlog.Web
 				endpoints.MapControllers();
 
 				endpoints.MapControllerRoute(
+					"Virtual Day Post Format",
+					"~/{year:int}/{month:int}/{day:int}",
+					new { controller = "BlogPost", action = "Post" });
+
+				endpoints.MapControllerRoute(
 					"Unique Original Post Format",
 					"~/{year:int}/{month:int}/{day:int}/{posttitle}.aspx",
 					new { controller = "BlogPost", action = "Post" });

@@ -102,7 +102,7 @@ namespace newtelligence.DasBlog.Runtime
 
 		public void Initialize()
 		{
-			DateUtc = DateTime.Now.ToUniversalTime().Date;
+			DateUtc = DateTime.UtcNow.Date;
 		}
 
 		/// <summary>
@@ -181,7 +181,7 @@ namespace newtelligence.DasBlog.Runtime
 			return null;
 		}
 
-		internal void Load(DataManager data)
+		internal void LoadIfRequired(DataManager data)
 		{
 			if ( Loaded ) 
 			{
@@ -240,11 +240,8 @@ namespace newtelligence.DasBlog.Runtime
 			}
 			else
 			{
-                // TODO: Web Core compatability issues ???
-                // System.Security.Principal.WindowsImpersonationContext wi = Impersonation.Impersonate();
-
+                // TODO: Need to run this as the system user
                 FileStream fileStream = FileUtils.OpenForWrite(fullPath);
-
 				if ( fileStream != null )
 				{
 					try
@@ -254,6 +251,7 @@ namespace newtelligence.DasBlog.Runtime
 						{
 							ser.Serialize(writer, this);
 						}
+						data.IncrementEntryEpoch();
 					}
 					catch(Exception e)
 					{
@@ -264,8 +262,6 @@ namespace newtelligence.DasBlog.Runtime
 						fileStream.Close();
 					}
 				}
-
-				// wi.Undo();
 			}
 		}
 

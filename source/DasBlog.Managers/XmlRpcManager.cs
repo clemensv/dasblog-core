@@ -191,7 +191,7 @@ namespace DasBlog.Managers
 		{
 			VerifyAccess(username, password);
 
-			var entries = dataService.GetEntriesForDay(DateTime.Now.ToUniversalTime(), dasBlogSettings.GetConfiguredTimeZone(), null,
+			var entries = dataService.GetEntriesForDay(DateTime.UtcNow, dasBlogSettings.GetConfiguredTimeZone(), null,
 														numberOfPosts, numberOfPosts, null);
 			var arrayList = new List<MoveableType.PostTitle>();
 			foreach (Entry entry in entries)
@@ -418,7 +418,7 @@ namespace DasBlog.Managers
 		{
 			VerifyAccess(username, password);
 
-			var entries = dataService.GetEntriesForDay(DateTime.Now.ToUniversalTime(), dasBlogSettings.GetConfiguredTimeZone(),
+			var entries = dataService.GetEntriesForDay(DateTime.UtcNow, dasBlogSettings.GetConfiguredTimeZone(),
 											null, numberOfPosts, numberOfPosts, null);
 			var arrayList = new List<Blogger.Post>();
 			foreach (Entry entry in entries)
@@ -509,7 +509,7 @@ namespace DasBlog.Managers
 				content = content.Substring(nTitleStop + TitleStop.Length);
 			}
 
-			//newPost.CreatedUtc = DateTime.Now.ToUniversalTime();
+			//newPost.CreatedUtc = DateTime.UtcNow;
 
 			entry.Title = title;
 			entry.Description = "";
@@ -594,7 +594,7 @@ namespace DasBlog.Managers
 		{
 			VerifyAccess(username, password);
 
-			var entries = dataService.GetEntriesForDay(DateTime.Now.ToUniversalTime(), dasBlogSettings.GetConfiguredTimeZone(), null,
+			var entries = dataService.GetEntriesForDay(DateTime.UtcNow, dasBlogSettings.GetConfiguredTimeZone(), null,
 														numberOfPosts, numberOfPosts, null);
 			var arrayList = new List<MetaWeblog.Post>();
 			foreach (Entry entry in entries)

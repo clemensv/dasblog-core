@@ -231,7 +231,7 @@ System.Exception: Failure in Users Controller
 		{
 			if (successExpected)
 			{
-				return (true, new EventDataDisplayItem(EventCodes.Error, "stuff", DateTime.Now));
+				return (true, new EventDataDisplayItem(EventCodes.Error, "stuff", DateTime.UtcNow));
 			}
 			else
 			{

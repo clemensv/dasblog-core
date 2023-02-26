@@ -44,9 +44,14 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using NodaTime;
+using NodaTime.Extensions;
+using NodaTime.TimeZones;
 
 namespace newtelligence.DasBlog.Runtime
 {
@@ -106,8 +111,9 @@ namespace newtelligence.DasBlog.Runtime
         private Queue sendMailInfoQueue;
         private Thread sendMailInfoHandlerThread;
         private ILoggingDataService loggingService;
+		private EntryIdCache theCache;
 
-        private CommentFile allComments;
+		private CommentFile allComments;
         protected string ContentBaseDirectory
         {
             get
@@ -144,8 +150,9 @@ namespace newtelligence.DasBlog.Runtime
             
             data = new DataManager();
             data.Resolver = new ResolveFileCallback(this.GetAbsolutePath);
-            
-            trackingQueue = new Queue();
+			theCache = EntryIdCache.GetInstance(data);
+
+			trackingQueue = new Queue();
             trackingQueueEvent = new AutoResetEvent(false);
             trackingHandlerThread = new Thread(new ThreadStart(this.TrackingHandler));
             trackingHandlerThread.IsBackground = true;
@@ -158,10 +165,7 @@ namespace newtelligence.DasBlog.Runtime
             sendMailInfoHandlerThread.Start();
             
             allComments = new CommentFile(contentBaseDirectory);
-
-            //OmarS: now we want to initialize the EntryIdCache so this doesn't happen elsewhere later on
-//            InitCache();
-        }
+		}
 
 
         protected string GetAbsolutePath(string file)
@@ -169,23 +173,9 @@ namespace newtelligence.DasBlog.Runtime
             return Path.Combine(contentBaseDirectory, file);
         }
 
-//        private object cacheLock = new object();
-//        private EntryIdCache theCache;
-
-
-        EntryCollection IBlogDataService.GetEntries(bool fullContent) {
-    
-            if (fullContent) {
-                throw new NotImplementedException("EntryCollection with entries with full content not yet implemted.");
-            }
-
-            //if (theCache == null || theCache.ChangeNumber != data.CurrentEntryChangeCount) {
-            //    InitCache();
-            //}
-
-            return EntryIdCache.GetInstance(data).GetEntries();
-
-            //return theCache.GetEntries();
+        EntryCollection IBlogDataService.GetEntries(bool fullContent) 
+		{
+            return theCache.GetEntries();
         }
 
         protected DateTime GetDateForEntry(string entryId)
@@ -196,68 +186,31 @@ namespace newtelligence.DasBlog.Runtime
                 // HttpContext.Current.Trace.Write("entryId is empty!");
             }
 
-
             DateTime foundDate = EntryIdCache.GetInstance(data).GetDateFromEntryId(entryId);
             if (foundDate == DateTime.MinValue)
             {
                 foundDate = EntryIdCache.GetInstance(data).GetDateFromCompressedTitle(entryId);
             }
-
-            //SDH: Folks find this warning more irritating and confusing than helpful.
-            /* 
-             if ((foundDate == DateTime.MinValue))
-            {
-                StackTrace st = new StackTrace();
-                try
-                {
-                    // if we are running from the runtime, but not asp.net this will fail
-                    loggingService.AddEvent(new EventDataItem(EventCodes.Error,"GetDateForEntry: Can't find \"" + entryId + "\" " + st.ToString() + " " + HttpContext.Current.Request.RawUrl,String.Empty));
-                }
-                catch
-                {
-                    loggingService.AddEvent(new EventDataItem(EventCodes.Error,"GetDateForEntry: Can't find \"" + entryId + "\" " + st.ToString(),String.Empty));					
-                }
-            }
-            */
-            return foundDate;
+			return foundDate;
         }
 
         DayEntry InternalGetDayEntry(DateTime date)
         {
             DayEntry result = null;
-
-            // TODO: Web Core compatability issues ???
-            //System.Diagnostics.Debug.Write("Loading DayEntry for " + date.ToShortDateString());
-
-            if (data.Days.ContainsKey(date))
+			if (data.Days.ContainsKey(date))
             {
                 DayEntry day = data.Days[date];
-                day.Load(data);
+                day.LoadIfRequired(data);
                 result = day;
             }
-
-            /*
-            foreach (DayEntry day in data.Days)
-            {
-                if (day.DateUtc == date)
-                {
-                    day.Load(data);
-                    result = day;
-                    break;
-                }
-            }
-            */
-
-            if (result == null)
-            {
+			else 
+			{ 
                 result = new DayEntry();
                 result.Initialize();
                 result.DateUtc = date;
                 result.Save(data);
-                data.IncrementEntryChange();
             }
-
-            return result;
+			return result;
         }
 
         DayEntry IBlogDataService.GetDayEntry(DateTime date)
@@ -301,7 +254,7 @@ namespace newtelligence.DasBlog.Runtime
         {
             // we look one day ahead into "UTC" future in order to grab 
             // the timezones ahead of UTC.
-            return DayEntryCollectionFilter.FindAll(data.Days, DayEntryCollectionFilter.DefaultFilters.OccursBefore(startDate.Date.AddDays(1)), maxDays);
+            return DayEntryCollectionFilter.FindAll(data.Days, DayEntryCollectionFilter.DefaultFilters.OccursBefore(startDate.Date), maxDays);
         }
 
         /// <summary>
@@ -401,19 +354,9 @@ namespace newtelligence.DasBlog.Runtime
 
                     trackbackMsg += "&blog_name=" + WebUtility.UrlEncode(job.info.SourceBlogName);
 
-                    WebRequest request = WebRequest.Create(new Uri(trackbackUrl));
-
-                    request.Method = "POST";
-                    request.ContentType = "application/x-www-form-urlencoded";
-
-                    using (StreamWriter requestWriter = new StreamWriter(request.GetRequestStream()))
-                    {
-                        requestWriter.Write(trackbackMsg);
-                    }
-
-                    using (request.GetResponse())
-                    {
-                    }
+					var client = new HttpClient();
+					var content = new StringContent(trackbackMsg, Encoding.UTF8, "application/x-www-form-urlencoded");
+					var response = client.PostAsync(trackbackUrl, content).Result;
 
                     this.loggingService.AddEvent(
                         new EventDataItem(
@@ -439,30 +382,14 @@ namespace newtelligence.DasBlog.Runtime
             }
         }
 
-        private class CrosspostJob
-        {
-            internal object info;
-            internal Entry entry;
-            internal IBlogDataService dataService;
-
-            internal CrosspostJob(object info, Entry entry, IBlogDataService dataService)
-            {
-                this.info = info;
-                this.entry = entry;
-                this.dataService = dataService;
-            }
-        }
-
-
         protected Entry InternalGetEntry(string entryId)
         {
             Entry entryResult = null;
             DayEntry day;
 
-            // The entry lookup hashtables use the UrlEncoded version of the title
+            // The entry lookup hashtables use the UrlEncoded version of the entryId or compressed title
             entryId = WebUtility.UrlEncode(entryId);
-
-            DateTime foundDate = GetDateForEntry(entryId);
+			DateTime foundDate = GetDateForEntry(entryId);
             if (foundDate == DateTime.MinValue)
             {
                 entryResult = null;
@@ -526,33 +453,45 @@ namespace newtelligence.DasBlog.Runtime
         /// <param name="maxDays">The maximum number of days to include.</param>
         /// <param name="maxEntries">The maximum number of entries to return.</param>
         /// <returns></returns>
-        public EntryCollection /*IBlogDataService*/ GetEntries(
+        public EntryCollection GetEntries(
             Predicate<DayEntry> dayEntryCriteria,
             Predicate<Entry> entryCriteria,
             int maxDays, int maxEntries)
         {
             EntryCollection entries = new EntryCollection();
-            DayEntryCollection days = this.InternalGetDayEntries(dayEntryCriteria, maxDays);
+			// we're first getting the day entries from the lazily-built cache
+			DayEntryCollection days = this.InternalGetDayEntries(dayEntryCriteria, maxDays);
             int entryCount = 0;
 
+			// iterate over the days and add the entries to the collection
             foreach (DayEntry day in days)
             {
-                day.Load(data);
+                day.LoadIfRequired(data);
 
-				Entry today = new Entry();
-				today.Title = day.DateUtc.ToString("d");
-				today.Content = string.Empty;
-				today.EntryId = Guid.NewGuid().ToString();
-				today.CreatedUtc = day.DateUtc;
-				today.ModifiedUtc = day.DateUtc;
-				
-                foreach (Entry entry in day.GetEntries(entryCriteria))
+				// the virtual "today" entry is used for all entries that don't have a title
+				// these entries' id is prefixed with "day-" and the date is used as the id
+				// Those virtual entries can't be edited
+				var today = new Entry
+				{
+					Title = day.DateUtc.ToString("d"),
+					Content = string.Empty,
+					EntryId = "day-" + day.DateUtc.ToString("yyyyMMdd"), // e.g. day-20230101
+					CreatedUtc = day.DateUtc,
+					ModifiedUtc = day.DateUtc,
+					IsPublic = true,
+					AllowComments = false,
+					ShowOnFrontPage = true
+				};
+
+				foreach (var entry in day.GetEntries(entryCriteria))
                 {
+					// if the entry has no title, add it to the virtual day entry
 					if (string.IsNullOrEmpty(entry.Title))
 					{
 						string content = !string.IsNullOrEmpty(entry.Content)?entry.Content:(!string.IsNullOrEmpty(entry.Description)?entry.Description:string.Empty);
 						if ( !string.IsNullOrEmpty(content))
 						{
+							// the entries are added prefixed by a link that links to their details page, which isn't listed independently, otherwise
 							today.Content += $"<div class=\"dasblog-dayentry\"><a style=\"margin-right:2ch\" href=\"{makePathRelativeToRoot($"post/{entry.EntryId}")}\">#</a>" + content + "</div>";
 						}
 					}
@@ -567,6 +506,7 @@ namespace newtelligence.DasBlog.Runtime
                     }
                 }
 
+				// if we did add something to the "today" entry, it it put into the result
 				if ( today.Content.Length > 0 )
 				{
 					entries.Add(today);
@@ -602,13 +542,10 @@ namespace newtelligence.DasBlog.Runtime
         EntryCollection IBlogDataService.GetEntriesForDay(
             DateTime startDateUtc, DateTimeZone tz, string acceptLanguages, int maxDays, int maxEntries, string categoryName)
         {
-            EntryCollection entries;
+			EntryCollection entries;
             Predicate<Entry> entryCriteria = null;
-
-            // the entry is only eligible if its timezone time is within start date or earlier 
-            //entryCriteria += EntryCollection.CriteriaHandlerFactory.OccursBetween(
-            //	tz, startDateUtc.Date, startDateUtc.AddDays(1).AddSeconds(-1) );
-            if (categoryName != null &&
+						
+			if (categoryName != null &&
                 categoryName.Length > 0)
             {
                 entryCriteria += EntryCollectionFilter.DefaultFilters.IsInCategory(categoryName);
@@ -619,9 +556,11 @@ namespace newtelligence.DasBlog.Runtime
                 entryCriteria += EntryCollectionFilter.DefaultFilters.IsInAcceptedLanguagesOrMultiLingual(acceptLanguages);
             }
 
-            // HACK AG AddDays(1) removed to prevent showing entries after the selected date.
-            entries = GetEntries(
-                DayEntryCollectionFilter.DefaultFilters.OccursBefore(startDateUtc.Date.AddDays(1)),
+			// set the time on the startDateUtc to 23:59:59, then shift to TZ
+			var startDate = startDateUtc.ToUniversalTime().Date.AddDays(1).AddSeconds(-1);
+			startDate = new DateTimeOffset(startDate, tz.GetUtcOffset(startDate.ToInstant()).ToTimeSpan()).LocalDateTime;
+			entries = GetEntries(
+                DayEntryCollectionFilter.DefaultFilters.OccursBefore(startDate),
                 entryCriteria,
                 maxDays, maxEntries);
 
@@ -687,7 +626,7 @@ namespace newtelligence.DasBlog.Runtime
                         }
 
 
-                        day.Load(data);
+                        day.LoadIfRequired(data);
                         entry = day.GetEntries(entryCriteria)[detail.EntryId];
                         if (entry != null)
                         {
@@ -748,7 +687,7 @@ namespace newtelligence.DasBlog.Runtime
             return dayList.ToArray();
         }
 
-        void IBlogDataService.DeleteEntry(string entryId, CrosspostSiteCollection crosspostSites)
+        void IBlogDataService.DeleteEntry(string entryId)
         {
             DateTime foundDate = GetDateForEntry(entryId);
             if (foundDate == DateTime.MinValue)
@@ -759,63 +698,10 @@ namespace newtelligence.DasBlog.Runtime
 
             if (currentEntry != null)
             {
-                if (crosspostSites != null)
-                {
-                    //foreach (Crosspost cp in currentEntry.Crossposts)
-                    //{
-                    //    foreach (CrosspostSite site in crosspostSites)
-                    //    {
-                    //        if (site.ProfileName == cp.ProfileName)
-                    //        {
-                    //            try
-                    //            {
-                    //                BloggerAPIClientProxy proxy = new BloggerAPIClientProxy();
-                    //                UriBuilder uriBuilder = new UriBuilder("http", site.HostName, site.Port, site.Endpoint);
-                    //                proxy.Url = uriBuilder.ToString();
-                    //                proxy.UserAgent = this.UserAgent;
-
-                    //                proxy.blogger_deletePost("", cp.TargetEntryId, site.Username, site.Password, true);
-
-                    //                if (loggingService != null)
-                    //                {
-                    //                    loggingService.AddEvent(
-                    //                        new EventDataItem(EventCodes.CrosspostDeleted, currentEntry.Title, site.ProfileName));
-                    //                }
-                    //            }
-                    //            catch (XmlRpcFaultException xrfe)
-                    //            {
-                    //                ErrorTrace.Trace(TraceLevel.Error, xrfe);
-                    //                if (loggingService != null)
-                    //                {
-                    //                    loggingService.AddEvent(
-                    //                        new EventDataItem(EventCodes.Error,
-                    //                        xrfe.Message,
-                    //                        String.Format("Deleting cross-post entry {0} on {1}; Failed with server-fault code, {2} \"{3}\"", cp.TargetEntryId, cp.ProfileName, xrfe.FaultCode, xrfe.FaultString)));
-                    //                }
-                    //            }
-                    //            catch (Exception e)
-                    //            {
-                    //                ErrorTrace.Trace(TraceLevel.Error, e);
-                    //                if (loggingService != null)
-                    //                {
-                    //                    loggingService.AddEvent(
-                    //                        new EventDataItem(EventCodes.Error,
-                    //                        e.ToString().Replace("\n", "<br />"),
-                    //                        String.Format("Deleting cross-post entry {0} from {1}", cp.TargetEntryId, cp.ProfileName)));
-                    //                }
-                    //            }
-                    //            break;
-                    //        }
-
-                    //    }
-                    //}
-                }
-
                 day.Entries.Remove(currentEntry);
             }
 
             day.Save(data);
-	        data.IncrementEntryChange();
         }
 
         EntrySaveState IBlogDataService.SaveEntry(Entry entry, params object[] trackingInfos)
@@ -895,7 +781,7 @@ namespace newtelligence.DasBlog.Runtime
                 // we will only change the mod date if there has been a change to a few things
                 if (currentEntry.CompareTo(entry) == 1)
                 {
-                    currentEntry.ModifiedUtc = DateTime.Now.ToUniversalTime();
+                    currentEntry.ModifiedUtc = DateTime.UtcNow;
                 }
 
                 currentEntry.Categories = entry.Categories;
@@ -916,22 +802,16 @@ namespace newtelligence.DasBlog.Runtime
 				currentEntry.Latitude = entry.Latitude;
 				currentEntry.Longitude = entry.Longitude;
 
-                currentEntry.Crossposts.Clear();
-                currentEntry.Crossposts.AddRange(entry.Crossposts);
                 currentEntry.Attachments.Clear();
                 currentEntry.Attachments.AddRange(entry.Attachments);
 
                 day.Save(data);
-                data.lastEntryUpdate = currentEntry.ModifiedUtc;
-                data.IncrementEntryChange();
                 found = true;
             }
             else
             {
                 day.Entries.Add(entry);
                 day.Save(data);
-                data.lastEntryUpdate = entry.CreatedUtc;
-                data.IncrementEntryChange();
                 found = false;
             }
 
@@ -949,59 +829,26 @@ namespace newtelligence.DasBlog.Runtime
             {
                 foreach (object trackingInfo in trackingInfos)
                 {
-                    //if (trackingInfo != null)
-                    //{
-                    //    if (trackingInfo is WeblogUpdatePingInfo)
-                    //    {
-                    //        ThreadPool.QueueUserWorkItem(
-                    //            new WaitCallback(this.PingWeblogsWorker),
-                    //            (WeblogUpdatePingInfo)trackingInfo);
-                    //    }
-                    //    else if (trackingInfo is PingbackInfo)
-                    //    {
-                    //        PingbackJob pingbackJob = new PingbackJob((PingbackInfo)trackingInfo, entry);
-
-                    //        ThreadPool.QueueUserWorkItem(
-                    //            new WaitCallback(this.PingbackWorker),
-                    //            pingbackJob);
-                    //    }
-                    //    else if (trackingInfo is PingbackInfoCollection)
-                    //    {
-                    //        PingbackInfoCollection pic = trackingInfo as PingbackInfoCollection;
-                    //        foreach (PingbackInfo pi in pic)
-                    //        {
-                    //            PingbackJob pingbackJob = new PingbackJob(pi, entry);
-
-                    //            ThreadPool.QueueUserWorkItem(
-                    //                new WaitCallback(this.PingbackWorker),
-                    //                pingbackJob);
-                    //        }
-                    //    }
-                    //    else if (trackingInfo is TrackbackInfo)
-                    //    {
-                    //        ThreadPool.QueueUserWorkItem(
-                    //            new WaitCallback(this.TrackbackWorker),
-                    //            new TrackbackJob((TrackbackInfo)trackingInfo, entry));
-                    //    }
-                    //    else if (trackingInfo is TrackbackInfoCollection)
-                    //    {
-                    //        TrackbackInfoCollection tic = trackingInfo as TrackbackInfoCollection;
-                    //        foreach (TrackbackInfo ti in tic)
-                    //        {
-                    //            ThreadPool.QueueUserWorkItem(
-                    //                new WaitCallback(this.TrackbackWorker),
-                    //                new TrackbackJob(ti, entry));
-                    //        }
-                    //    }
-                    //    else if (trackingInfo is CrosspostInfo ||
-                    //        trackingInfo is CrosspostInfoCollection)
-                    //    {
-                    //        ThreadPool.QueueUserWorkItem(
-                    //            new WaitCallback(this.CrosspostWorker),
-                    //            new CrosspostJob(trackingInfo, entry, this));
-                    //    }
-                    //}
-                }
+					if (trackingInfo != null)
+					{
+						if (trackingInfo is TrackbackInfo)
+						{
+							ThreadPool.QueueUserWorkItem(
+								new WaitCallback(this.TrackbackWorker),
+								new TrackbackJob((TrackbackInfo)trackingInfo, entry));
+						}
+						else if (trackingInfo is TrackbackInfoCollection)
+						{
+							TrackbackInfoCollection tic = trackingInfo as TrackbackInfoCollection;
+							foreach (TrackbackInfo ti in tic)
+							{
+								ThreadPool.QueueUserWorkItem(
+									new WaitCallback(this.TrackbackWorker),
+									new TrackbackJob(ti, entry));
+							}
+						}
+					}
+				}
             }
             return found ? EntrySaveState.Updated : EntrySaveState.Added;
         }
@@ -1073,7 +920,7 @@ namespace newtelligence.DasBlog.Runtime
                 tracking.TargetTitle = entry.Title;
                 extra.Trackings.Add(tracking);
                 extra.Save(data);
-                data.IncrementExtraChange();
+                data.IncrementExtraEpoch();
             }
         }
 
@@ -1285,7 +1132,7 @@ namespace newtelligence.DasBlog.Runtime
             DayExtra extra = data.GetDayExtra(date);
             extra.Comments.Add(comment);
             extra.Save(data);
-            data.IncrementExtraChange();
+            data.IncrementExtraEpoch();
             // update the all comments file
             allComments.AddComment(comment);
         }
@@ -1314,7 +1161,7 @@ namespace newtelligence.DasBlog.Runtime
             {
                 extra.Comments.Remove(c);
                 extra.Save(data);
-                data.IncrementExtraChange();
+                data.IncrementExtraEpoch();
 
                 // update the all comments file
                 allComments.DeleteComment(commentid);
@@ -1335,7 +1182,7 @@ namespace newtelligence.DasBlog.Runtime
                 c.IsPublic = true;
                 c.SpamState = SpamState.NotSpam;
                 extra.Save(data);
-                data.IncrementExtraChange();
+                data.IncrementExtraEpoch();
 
                 // update the all comments file
                 allComments.UpdateComment(c);
@@ -1460,5 +1307,65 @@ namespace newtelligence.DasBlog.Runtime
             }
             return page;
         }
-    }
+
+		public Entry GetVirtualEntryForDay(DateTime postDay)
+		{
+			var today = new Entry
+			{
+				Title = postDay.ToString("d"),
+				Content = string.Empty,
+				EntryId = "day-" + postDay.ToString("yyyyMMdd"), // e.g. day-20230101
+				CreatedUtc = postDay,
+				ModifiedUtc = postDay,
+				IsPublic = true,
+				AllowComments = false,
+				ShowOnFrontPage = true
+			};
+
+			if  ( data.Days.ContainsKey(postDay) ) 
+			{
+				DayEntry day = data.Days[postDay];
+				day.LoadIfRequired(data);
+				foreach (var entry in day.GetEntries((e) => string.IsNullOrEmpty(e.Title)))
+				{
+					string content = !string.IsNullOrEmpty(entry.Content) ? entry.Content : (!string.IsNullOrEmpty(entry.Description) ? entry.Description : string.Empty);
+					if (!string.IsNullOrEmpty(content))
+					{
+						// the entries are added prefixed by a link that links to their details page, which isn't listed independently, otherwise
+						today.Content += $"<div class=\"dasblog-dayentry\"><a style=\"margin-right:2ch\" href=\"{makePathRelativeToRoot($"post/{entry.EntryId}")}\">#</a>" + content + "</div>";
+					}
+				}
+			}
+			return today;
+		}
+
+		public Entry GetEntryByTitle(string posttitle)
+		{
+			Entry entryResult = null;
+			DayEntry day;
+
+			// The entry lookup hashtables use the UrlEncoded version of the entryId or compressed title
+			posttitle = WebUtility.UrlEncode(posttitle);
+			DateTime foundDate = theCache.GetDateFromCompressedTitle(posttitle);
+			if (foundDate == DateTime.MinValue)
+			{
+				entryResult = null;
+			}
+			else
+			{
+				day = InternalGetDayEntry(foundDate);
+				entryResult = day.GetEntryByTitle(posttitle);
+			}
+
+			// Don't return entries where IsPublic is false
+			// unless the user is in the "admin" role.
+			if ((entryResult != null)
+				&& (!entryResult.IsPublic)
+				&& !Thread.CurrentPrincipal.IsInRole("admin"))
+			{
+				entryResult = null;
+			}
+			return entryResult;
+		}
+	}
 }

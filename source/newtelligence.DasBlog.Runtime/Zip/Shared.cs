@@ -95,7 +95,7 @@ namespace newtelligence.DasBlog.Runtime.Zip
             int minute = (packedTime & 0x07E0) >> 5;
             int second = packedTime & 0x001F;
 
-            DateTime d = System.DateTime.Now;
+            DateTime d = System.DateTime.UtcNow;
             try { d = new System.DateTime(year, month, day, hour, minute, second, 0); }
             catch
             {

@@ -286,7 +286,18 @@ namespace DasBlog.Web.Settings
 		{
 			string link;
 
-			if (SiteConfiguration.EnableTitlePermaLinkUnique)
+			if (entry.EntryId.StartsWith("day-"))
+			{
+				if (SiteConfiguration.EnableTitlePermaLinkUnique)
+				{
+					link = GetPermaTitle($"{entry.CreatedUtc.Year:D4}/{entry.CreatedUtc.Month:D2}/{entry.CreatedUtc.Day:D2}");
+				}
+				else
+				{
+					link = GetPermaTitle(entry.EntryId);
+				}
+			}
+			else if (SiteConfiguration.EnableTitlePermaLinkUnique)
 			{
 				link = GetPermaTitle(entry.CompressedTitleUnique);
 			}

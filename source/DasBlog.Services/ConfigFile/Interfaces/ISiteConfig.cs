@@ -132,9 +132,7 @@ namespace DasBlog.Services.ConfigFile.Interfaces
 
         bool EnableUrlRewriting { get; set; }
 
-        bool EnableCrossposts { get; set; }
-
-		bool EnableCloudEvents { get; set; }
+        bool EnableCloudEvents { get; set; }
 
 		bool UseUserCulture { get; set; }
 
@@ -199,12 +197,6 @@ namespace DasBlog.Services.ConfigFile.Interfaces
 
         ContentFilter[] ContentFilterArray { get; set; }
 
-        [XmlIgnore]
-        CrosspostSiteCollection CrosspostSites { get; set; }
-
-        [XmlArray("CrosspostSites")]
-        CrosspostSite[] CrosspostSiteArray { get; set; }
-
 		[XmlIgnore]
 		CloudEventsTargetCollection CloudEventsTargets { get; set; }
 
@@ -234,10 +226,6 @@ namespace DasBlog.Services.ConfigFile.Interfaces
         bool EnableMovableTypeBlackList { get; set; }
 
         string ChannelImageUrl { get; set; }
-
-        bool EnableCrossPostFooter { get; set; }
-
-        string CrossPostFooter { get; set; }
 
         bool ExtensionlessUrls { get; set; }
 

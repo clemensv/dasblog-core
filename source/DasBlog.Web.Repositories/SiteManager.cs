@@ -27,13 +27,13 @@ namespace DasBlog.Managers
             root.url = new urlCollection();
 
             //Default first...
-            var basePage = new url(dasBlogSettings.GetBaseUrl(), DateTime.Now, changefreq.daily, 1.0M);
+            var basePage = new url(dasBlogSettings.GetBaseUrl(), DateTime.UtcNow, changefreq.daily, 1.0M);
             root.url.Add(basePage);
 
-            var archivePage = new url(dasBlogSettings.RelativeToRoot("archive"), DateTime.Now, changefreq.daily, 1.0M);
+            var archivePage = new url(dasBlogSettings.RelativeToRoot("archive"), DateTime.UtcNow, changefreq.daily, 1.0M);
             root.url.Add(archivePage);
 
-			var categorpage = new url(dasBlogSettings.RelativeToRoot("category"), DateTime.Now, changefreq.daily, 1.0M);
+			var categorpage = new url(dasBlogSettings.RelativeToRoot("category"), DateTime.UtcNow, changefreq.daily, 1.0M);
 			root.url.Add(categorpage);
 
 			//All Pages
@@ -47,19 +47,19 @@ namespace DasBlog.Managers
                     var freq = changefreq.daily;
 
                     //new stuff?
-                    if (e.CreatedLocalTime < DateTime.Now.AddMonths(-9))
+                    if (e.CreatedUtc < DateTime.UtcNow.AddMonths(-9))
                     {
                         freq = changefreq.yearly;
                     }
-                    else if (e.CreatedLocalTime < DateTime.Now.AddDays(-30))
+                    else if (e.CreatedUtc < DateTime.UtcNow.AddDays(-30))
                     {
                         freq = changefreq.monthly;
                     }
-                    else if (e.CreatedLocalTime < DateTime.Now.AddDays(-7))
+                    else if (e.CreatedUtc < DateTime.UtcNow.AddDays(-7))
                     {
                         freq = changefreq.weekly;
                     }
-                    if (e.CreatedLocalTime > DateTime.Now.AddDays(-2))
+                    if (e.CreatedUtc > DateTime.UtcNow.AddDays(-2))
                     {
                         freq = changefreq.hourly;
                     }
@@ -68,12 +68,12 @@ namespace DasBlog.Managers
                     // Only add comments if we aren't showing comments on permalink pages already
                     if (dasBlogSettings.SiteConfiguration.ShowCommentsWhenViewingEntry == false)
                     {
-                        var commentPage = new url(dasBlogSettings.GetCommentViewUrl(e.CompressedTitle), e.CreatedLocalTime, freq, 0.7M);
+                        var commentPage = new url(dasBlogSettings.GetCommentViewUrl(e.CompressedTitle), e.CreatedUtc, freq, 0.7M);
                         root.url.Add(commentPage);
                     }
 
                     //then add permalinks
-                    var permaPage = new url(dasBlogSettings.RelativeToRoot(dasBlogSettings.GeneratePostUrl(e)), e.CreatedLocalTime, freq, 0.9M);
+                    var permaPage = new url(dasBlogSettings.RelativeToRoot(dasBlogSettings.GeneratePostUrl(e)), e.CreatedUtc, freq, 0.9M);
                     root.url.Add(permaPage);
                 }
             }
@@ -85,7 +85,7 @@ namespace DasBlog.Managers
                 if (cce.IsPublic)
                 {
 					var catname = Entry.InternalCompressTitle(cce.Name, dasBlogSettings.SiteConfiguration.TitlePermalinkSpaceReplacement).ToLower();
-					var caturl = new url(dasBlogSettings.GetCategoryViewUrl(catname), DateTime.Now, changefreq.weekly, 0.6M);
+					var caturl = new url(dasBlogSettings.GetCategoryViewUrl(catname), DateTime.UtcNow, changefreq.weekly, 0.6M);
                     root.url.Add(caturl);
                 }
             }

@@ -28,6 +28,8 @@ using System.Text;
 using newtelligence.DasBlog.Runtime;
 using EventDataItem = DasBlog.Services.ActivityLogs.EventDataItem;
 using EventCodes = DasBlog.Services.ActivityLogs.EventCodes;
+using AutoMapper.Internal;
+using Markdig.Helpers;
 
 namespace DasBlog.Web.Controllers
 {
@@ -68,13 +70,10 @@ namespace DasBlog.Web.Controllers
 		[AllowAnonymous]
 		public IActionResult Post(string posttitle, string day, string month, string year)
 		{
-			var lpvm = new ListPostsViewModel();
-
-			var uniquelinkdate = ValidateUniquePostDate(year, month, day);
-
-			var entry = blogManager.GetBlogPost(posttitle, uniquelinkdate);
+			Entry entry = ResolveEntryFromRequest(posttitle, day, month, year);
 			if (entry != null)
 			{
+				var lpvm = new ListPostsViewModel();
 				var pvm = mapper.Map<PostViewModel>(entry);
 				pvm.Content = embeddingHandler.InjectCategoryLinksAsync(pvm.Content).GetAwaiter().GetResult();
 				pvm.Content = embeddingHandler.InjectDynamicEmbeddingsAsync(pvm.Content).GetAwaiter().GetResult();
@@ -112,6 +111,33 @@ namespace DasBlog.Web.Controllers
 				}
 				return RedirectToAction("index", "home");
 			}
+		}
+
+		private Entry ResolveEntryFromRequest(string posttitle, string day, string month, string year)
+		{
+			Entry entry;
+			// if posttitle matches D-00000000 then it is a virtual day entry
+			if (string.IsNullOrEmpty(posttitle) && !string.IsNullOrEmpty(day) && !string.IsNullOrEmpty(month) && !string.IsNullOrEmpty(year))
+			{
+				var postDay = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
+				entry = blogManager.GetVirtualBlogPostForDay(postDay);
+			}
+			else if (posttitle.StartsWith("day-", StringComparison.InvariantCultureIgnoreCase) && posttitle.Substring(4).All(x => x.IsDigit()))
+			{
+				var postDay = DateTime.ParseExact(posttitle.Substring(4), "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+				entry = blogManager.GetVirtualBlogPostForDay(postDay);
+			}
+			else if (Guid.TryParse(posttitle, out Guid postid))
+			{
+				entry = blogManager.GetBlogPostByGuid(postid);
+			}
+			else
+			{
+				var uniquelinkdate = ValidateUniquePostDate(year, month, day);
+				entry = blogManager.GetBlogPost(posttitle, uniquelinkdate);
+			}
+
+			return entry;
 		}
 
 		[AllowAnonymous]
@@ -469,22 +495,9 @@ namespace DasBlog.Web.Controllers
 		public IActionResult Comment(string posttitle, string day, string month, string year)
 		{
 			ListPostsViewModel lpvm = null;
-			NBR.Entry entry = null;
 			var postguid = Guid.Empty;
 
-			var uniquelinkdate = ValidateUniquePostDate(year, month, day);
-
-			entry = blogManager.GetBlogPost(posttitle, uniquelinkdate);
-
-			if (entry == null && Guid.TryParse(posttitle, out postguid))
-			{
-				entry = blogManager.GetBlogPostByGuid(postguid);
-
-				var pvm = mapper.Map<PostViewModel>(entry);
-
-				return RedirectPermanent(dasBlogSettings.GetCommentViewUrl(pvm.PermaLink));
-			}
-
+			Entry entry = ResolveEntryFromRequest(posttitle, day, month, year);
 			if (entry != null)
 			{
 				lpvm = new ListPostsViewModel
@@ -614,7 +627,7 @@ namespace DasBlog.Web.Controllers
 			commt.AuthorUserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
 			commt.EntryId = Guid.NewGuid().ToString();
 			commt.IsPublic = !dasBlogSettings.SiteConfiguration.CommentsRequireApproval;
-			commt.CreatedUtc = commt.ModifiedUtc = DateTime.Now.ToUniversalTime();
+			commt.CreatedUtc = commt.ModifiedUtc = DateTime.UtcNow;
 
 			logger.LogInformation(new EventDataItem(EventCodes.CommentAdded, null, "Comment CONTENT DUMP", commt.Content));
 

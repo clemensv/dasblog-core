@@ -60,7 +60,6 @@ namespace newtelligence.DasBlog.Runtime
 		string _author;
 		string _categories;
 		string _compressedTitle;
-		CrosspostCollection _crossposts = new CrosspostCollection();
 		string _description;
 		bool _isPublic = true;
 		Nullable<double> _latitude = new Nullable<double>();
@@ -190,29 +189,6 @@ namespace newtelligence.DasBlog.Runtime
 				}
 
 				return null;
-			}
-		}
-
-		[XmlIgnore]
-		public CrosspostCollection Crossposts
-		{
-			get { return _crossposts; }
-		}
-
-		[XmlArray("Crossposts")]
-		public Crosspost[] CrosspostArray
-		{
-			get { return new List<Crosspost>(_crossposts).ToArray(); }
-			set
-			{
-				if (value == null)
-				{
-					_crossposts = new CrosspostCollection();
-				}
-				else
-				{
-					_crossposts = new CrosspostCollection(value);
-				}
 			}
 		}
 

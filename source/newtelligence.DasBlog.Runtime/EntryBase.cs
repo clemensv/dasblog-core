@@ -95,14 +95,14 @@ namespace newtelligence.DasBlog.Runtime
 
         public void Initialize()
         {
-            CreatedUtc = DateTime.Now.ToUniversalTime();
-            ModifiedUtc = DateTime.Now.ToUniversalTime();
+            CreatedUtc = DateTime.UtcNow;
+            ModifiedUtc = DateTime.UtcNow;
             EntryId = Guid.NewGuid().ToString();
         }
 
         public void Modify()
         {
-            ModifiedUtc = DateTime.Now.ToUniversalTime();
+            ModifiedUtc = DateTime.UtcNow;
         }
     }
 }

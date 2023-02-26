@@ -30,7 +30,7 @@ namespace DasBlog.Services.Scheduler
 			this.logger = logger;
 			this.activityService = activityService;
 			this.dasBlogSettings = dasBlogSettings;
-			midnight = DateTime.Now.Date;
+			midnight = DateTime.UtcNow.Date;
 			EMAIL_TITLE = string.Format("Weblog Daily Activity Report for {0}, {1}", midnight.DayOfWeek, midnight.ToString("MMMM dd, yyyy"));
 		}
 

@@ -113,7 +113,7 @@ namespace newtelligence.DasBlog.Runtime
 
 		public void Initialize()
 		{
-			DateUtc = DateTime.Now.ToUniversalTime().Date;
+			DateUtc = DateTime.UtcNow.Date;
 		}
 
 		internal CommentCollection GetCommentsFor(string entryId, DataManager data)

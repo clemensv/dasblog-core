@@ -56,11 +56,11 @@ namespace DasBlog.Managers
 			{
 				posttitle = posttitle.Replace(dasBlogSettings.SiteConfiguration.TitlePermalinkSpaceReplacement, string.Empty)
 									.Replace(".aspx", string.Empty);
-				return dataService.GetEntry(posttitle);
+				return dataService.GetEntryByTitle(posttitle);
 			}
 			else
 			{
-				var entries = dataService.GetEntriesForDay(dt.Value, null, null, 1, 10, null);
+				var entries = dataService.GetEntriesForDay(dt.Value, dasBlogSettings.GetConfiguredTimeZone(), null, 1, 10, null);
 				// GeneratePostUrl runs UrlEncode over the URL and therefore we have to do the same here to 
 				// make sure we match Umlauts and other characters requiring encoding that occur in titles.
 				var encodedPostTitle = WebUtility.UrlEncode(posttitle);
@@ -200,7 +200,7 @@ namespace DasBlog.Managers
 
 		public EntrySaveState CreateEntry(Entry entry)
 		{
-			var rtn = InternalSaveEntry(entry, null, null);
+			var rtn = InternalSaveEntry(entry, null);
 			LogEvent(EventCodes.EntryAdded, entry);
 			// not awaited on purpose
 			cloudEventsSource.RaisePostCreatedCloudEventAsync(entry);
@@ -210,7 +210,7 @@ namespace DasBlog.Managers
 		
 		public EntrySaveState UpdateEntry(Entry entry)
 		{
-			var rtn = InternalSaveEntry(entry, null, null);
+			var rtn = InternalSaveEntry(entry, null);
 			LogEvent(EventCodes.EntryChanged, entry);
 			// not awaited on purpose
 			cloudEventsSource.RaisePostUpdatedCloudEventAsync(entry);
@@ -220,7 +220,7 @@ namespace DasBlog.Managers
 		public void DeleteEntry(string postid)
 		{
 			var entry = GetEntryForEdit(postid);
-			dataService.DeleteEntry(postid, null);
+			dataService.DeleteEntry(postid);
 			LogEvent(EventCodes.EntryDeleted, entry);
 			// not awaited on purpose
 			cloudEventsSource.RaisePostDeletedCloudEventAsync(entry);
@@ -277,20 +277,11 @@ namespace DasBlog.Managers
 			logger.LogInformation(new EventDataItem(eventCode, new Uri(dasBlogSettings.GetPermaLinkUrl(entry.EntryId)), entry.Title??entry.EntryId));
 		}
 
-		private EntrySaveState InternalSaveEntry(Entry entry, TrackbackInfoCollection trackbackList, CrosspostInfoCollection crosspostList)
+		private EntrySaveState InternalSaveEntry(Entry entry, TrackbackInfoCollection trackbackList)
 		{
 
 			EntrySaveState rtn = EntrySaveState.Failed;
-			// we want to prepopulate the cross post collection with the crosspost footer
-			if (dasBlogSettings.SiteConfiguration.EnableCrossPostFooter && dasBlogSettings.SiteConfiguration.CrossPostFooter != null 
-				&& dasBlogSettings.SiteConfiguration.CrossPostFooter.Length > 0)
-			{
-				foreach (CrosspostInfo info in crosspostList)
-				{
-					info.CrossPostFooter = dasBlogSettings.SiteConfiguration.CrossPostFooter;
-				}
-			}
-
+			
 			// now save the entry, passign in all the necessary Trackback and Pingback info.
 			try
 			{
@@ -316,7 +307,7 @@ namespace DasBlog.Managers
 				}
 				entry.Categories = entry.Categories.TrimStart(';');
 				rtn = dataService.SaveEntry(entry, MaybeBuildWeblogPingInfo(), entry.IsPublic
-											? trackbackList : null, MaybeBuildPingbackInfo(entry), crosspostList);
+											? trackbackList : null, MaybeBuildPingbackInfo(entry));
 
 				//TODO: SendEmail(entry, siteConfig, logService);
 			}
@@ -328,7 +319,7 @@ namespace DasBlog.Managers
 
 				LoggedException le = new LoggedException("file failure", ex);
 
-				var edi = new EventDataItem(EventCodes.Error, null, "Failed to Save a Post on {date}", DateTime.Now.ToShortDateString());
+				var edi = new EventDataItem(EventCodes.Error, null, "Failed to Save a Post on {date}", DateTime.UtcNow.ToShortDateString());
 				logger.LogError(edi,le);
 			}
 
@@ -597,22 +588,10 @@ namespace DasBlog.Managers
 
 			return dasBlogSettings.GetMailInfo(emailMessage);
 		}
+
+		Entry IBlogManager.GetVirtualBlogPostForDay(DateTime postDay)
+		{
+			return dataService.GetVirtualEntryForDay(postDay);
+		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

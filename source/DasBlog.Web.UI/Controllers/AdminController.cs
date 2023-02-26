@@ -67,7 +67,6 @@ namespace DasBlog.Web.Controllers
 			var meta = mapper.Map<MetaTags>(settings.MetaConfig);
 
 			site.SpamBlockingService = dasBlogSettings.SiteConfiguration.SpamBlockingService;
-			site.CrosspostSites = dasBlogSettings.SiteConfiguration.CrosspostSites;
 			site.PingServices = dasBlogSettings.SiteConfiguration.PingServices;
 
 			if (!fileSystemBinaryManager.SaveSiteConfig(site))

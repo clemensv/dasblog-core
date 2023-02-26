@@ -336,7 +336,6 @@ namespace DasBlog.Web.Models.AdminViewModels
 		public bool EnablePingbackService { get; set; }
 		public bool EnableBlogrollDescription { get; set; }
 		public bool EnableUrlRewriting { get; set; }
-		public bool EnableCrossposts { get; set; }
 		public bool UseUserCulture { get; set; }
 		public bool EnableClickThrough { get; set; }
 		public bool EnableAggregatorBugging { get; set; }
@@ -366,8 +365,6 @@ namespace DasBlog.Web.Models.AdminViewModels
 		public string[] ReferralUrlBlackListArray { get; set; }
         public bool EnableReferralUrlBlackList404s { get; set; }
 		public bool EnableMovableTypeBlackList { get; set; }
-		public bool EnableCrossPostFooter { get; set; }
-		public string CrossPostFooter { get; set; }
 		public bool ExtensionlessUrls { get; set; }
 		public bool EnableTitlePermaLink { get; set; }
 		public bool EnableTitlePermaLinkSpaces { get; set; }

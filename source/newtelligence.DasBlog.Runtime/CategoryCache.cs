@@ -81,7 +81,7 @@ namespace newtelligence.DasBlog.Runtime
             lock (_entriesLock)
             {
                 Load(data);
-                if (_booting || ChangeNumber != data.CurrentEntryChangeCount)
+                if (_booting || ChangeNumber != data.CurrentEntryEpoch)
                 {
                     _booting = false;
                     Build(data);
@@ -92,13 +92,13 @@ namespace newtelligence.DasBlog.Runtime
 
         internal void Build(DataManager data)
         {
-            ChangeNumber = data.CurrentEntryChangeCount;
+            ChangeNumber = data.CurrentEntryEpoch;
             Dictionary<string,CategoryCacheEntry> build = new Dictionary<string,CategoryCacheEntry>();
             CategoryCacheEntry categoryCacheEntry;
 
             foreach (DayEntry day in data.Days)
             {
-                day.Load(data);
+                day.LoadIfRequired(data);
 
                 foreach (Entry entry in day.Entries)
                 {

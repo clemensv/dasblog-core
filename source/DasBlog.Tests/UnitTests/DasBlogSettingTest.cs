@@ -251,11 +251,14 @@ namespace DasBlog.Tests.UnitTests
 			{
 				link = GetPermaTitle(entry.CompressedTitleUnique);
 			}
-			else
+			else if ( SiteConfiguration.EnableTitlePermaLink)
 			{
 				link = GetPermaTitle(entry.CompressedTitle);
 			}
-
+			else
+			{
+				link = GetPermaLinkUrl(entry.EntryId);
+			}
 			return link;
 		}
 

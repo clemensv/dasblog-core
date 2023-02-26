@@ -83,8 +83,6 @@ namespace DasBlog.Tests.UnitTests
 		public int XSSUpstreamInterval { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public ContentFilterCollection ContentFilters { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public ContentFilter[] ContentFilterArray { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-		public CrosspostSiteCollection CrosspostSites { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-		public CrosspostSite[] CrosspostSiteArray { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool Pop3DeleteAllMessages { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool Pop3LogIgnoredEmails { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool EnableReferralUrlBlackList { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -97,8 +95,6 @@ namespace DasBlog.Tests.UnitTests
 		public bool EnableReferralUrlBlackList404s { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool EnableMovableTypeBlackList { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public string ChannelImageUrl { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-		public bool EnableCrossPostFooter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-		public string CrossPostFooter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool ExtensionlessUrls { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool EnableTitlePermaLink { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool EnableTitlePermaLinkUnique { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

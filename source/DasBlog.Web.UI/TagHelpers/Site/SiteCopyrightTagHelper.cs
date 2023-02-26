@@ -20,7 +20,7 @@ namespace DasBlog.Web.TagHelpers
 		{
 			output.TagName = "";
 			output.TagMode = TagMode.StartTagAndEndTag;
-			output.Content.SetHtmlContent(string.Format("\u00a9 {0} - {1}", DateTime.Now.Year, dasBlogSettings.SiteConfiguration.Copyright));
+			output.Content.SetHtmlContent(string.Format("\u00a9 {0} - {1}", DateTime.UtcNow.Year, dasBlogSettings.SiteConfiguration.Copyright));
 		}
 
 		public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)

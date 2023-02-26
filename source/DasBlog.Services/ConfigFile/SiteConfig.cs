@@ -53,9 +53,7 @@ namespace DasBlog.Services.ConfigFile
 	public class SiteConfig : ISiteConfig
     {
         private string _root;
-        private string _cdnFrom;
-        private string _cdnTo;
-
+        
 		public SiteConfig() { }
 
         public string Title { get; set; }
@@ -153,9 +151,7 @@ namespace DasBlog.Services.ConfigFile
         public int XSSUpstreamInterval { get; set; }
         public ContentFilterCollection ContentFilters { get; set; }
         public ContentFilter[] ContentFilterArray { get; set; }
-        public CrosspostSiteCollection CrosspostSites { get; set; }
-		public CloudEventsTargetCollection CloudEventsTargets { get; set; }
-		public CrosspostSite[] CrosspostSiteArray { get; set; }
+        public CloudEventsTargetCollection CloudEventsTargets { get; set; }
 		public CloudEventsTarget[] CloudEventsTargetArray { get; set; }
 		public bool Pop3DeleteAllMessages { get; set; }
         public bool Pop3LogIgnoredEmails { get; set; }

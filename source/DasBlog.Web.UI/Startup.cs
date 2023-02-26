@@ -423,6 +423,11 @@ namespace DasBlog.Web
 						"New Post Format",
 						"~/{year:int}/{month:int}/{day:int}/{posttitle}",
 						new { controller = "BlogPost", action = "Post", postitle = "" });
+
+					endpoints.MapControllerRoute(
+						"Day summmary format",
+						"~/{year:int}/{month:int}/{day:int}",
+						new { controller = "BlogPost", action = "Post", postitle = "" });
 				}
 				else
 				{

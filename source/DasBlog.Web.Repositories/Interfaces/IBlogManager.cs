@@ -44,5 +44,6 @@ namespace DasBlog.Managers.Interfaces
 		EntryCollection SearchEntries(string searchString, string acceptLanguageHeader);
 
 		bool SendTestEmail();
+		Entry GetVirtualBlogPostForDay(DateTime postDay);
 	}
 }

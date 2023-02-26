@@ -27,7 +27,7 @@ namespace DasBlog.Web.Models.BlogViewModels
 								   (!string.IsNullOrEmpty(entry.Description) ? entry.Description.CutLongString(80) :
 									  entry.Content.StripHTMLFromText().CutLongString(80)),
 				BlogId = dasBlogSettings.GeneratePostUrl(entry),
-				Date = entry.CreatedLocalTime
+				Date = entry.CreatedUtc
 				
 			};
 		}

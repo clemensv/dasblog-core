@@ -12,6 +12,7 @@ using DasBlog.Web.Models.BlogViewModels;
 using DasBlog.Web.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -25,16 +26,18 @@ namespace DasBlog.Web.Controllers
 		private readonly IMapper mapper;
 		private readonly IBlogManager blogManager;
 		private readonly IHostApplicationLifetime appLifetime;
+		private readonly IMemoryCache memoryCache;
 		private readonly ILogger<AdminController> logger;
 
 		public AdminController(IDasBlogSettings dasBlogSettings, IFileSystemBinaryManager fileSystemBinaryManager, IMapper mapper,
-								IBlogManager blogManager, IHostApplicationLifetime appLifetime, ILogger<AdminController> logger) : base(dasBlogSettings)
+								IBlogManager blogManager, IHostApplicationLifetime appLifetime, IMemoryCache memoryCache, ILogger<AdminController> logger) : base(dasBlogSettings)
 		{
 			this.dasBlogSettings = dasBlogSettings;
 			this.fileSystemBinaryManager = fileSystemBinaryManager;
 			this.mapper = mapper;
 			this.blogManager = blogManager;
 			this.appLifetime = appLifetime;
+			this.memoryCache = memoryCache;
 			this.logger = logger;
 		}
 
@@ -68,13 +71,16 @@ namespace DasBlog.Web.Controllers
 
 			site.SpamBlockingService = dasBlogSettings.SiteConfiguration.SpamBlockingService;
 			site.PingServices = dasBlogSettings.SiteConfiguration.PingServices;
-
+			site.CloudEventsTargetArray = dasBlogSettings.SiteConfiguration.CloudEventsTargetArray;
+			site.CloudEventsTargets = dasBlogSettings.SiteConfiguration.CloudEventsTargets;
+			
 			if (!fileSystemBinaryManager.SaveSiteConfig(site))
 			{
 				ModelState.AddModelError("", "Unable to save Site configuration file.");
 				logger.LogError(new EventDataItem(EventCodes.Error, null, "Unable to save Site Config file"));
 				return Settings(settings);
 			}
+			
 			dasBlogSettings.SiteConfiguration = site;
 
 			if (!fileSystemBinaryManager.SaveMetaConfig(meta))
@@ -84,7 +90,8 @@ namespace DasBlog.Web.Controllers
 				return Settings(settings);
 			}
 			dasBlogSettings.MetaTags = meta;
-
+			BreakSiteCache();
+			
 			return Settings();
 		}
 
@@ -154,5 +161,15 @@ namespace DasBlog.Web.Controllers
 
 			return RedirectToAction("Settings");
 		}
+
+		private void BreakSiteCache()
+		{
+			blogManager.ResetCaches();
+			memoryCache.Remove(CACHEKEY_RSS);
+			memoryCache.Remove(CACHEKEY_FRONTPAGE);
+			memoryCache.Remove(CACHEKEY_ARCHIVE);
+			
+		}
+
 	}
 }

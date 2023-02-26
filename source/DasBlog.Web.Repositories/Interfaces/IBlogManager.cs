@@ -45,5 +45,6 @@ namespace DasBlog.Managers.Interfaces
 
 		bool SendTestEmail();
 		Entry GetVirtualBlogPostForDay(DateTime postDay);
+		void ResetCaches();
 	}
 }

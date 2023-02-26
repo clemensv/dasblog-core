@@ -111,8 +111,7 @@ namespace newtelligence.DasBlog.Runtime
         private Queue sendMailInfoQueue;
         private Thread sendMailInfoHandlerThread;
         private ILoggingDataService loggingService;
-		private EntryIdCache theCache;
-
+		
 		private CommentFile allComments;
         protected string ContentBaseDirectory
         {
@@ -150,8 +149,7 @@ namespace newtelligence.DasBlog.Runtime
             
             data = new DataManager();
             data.Resolver = new ResolveFileCallback(this.GetAbsolutePath);
-			theCache = EntryIdCache.GetInstance(data);
-
+			
 			trackingQueue = new Queue();
             trackingQueueEvent = new AutoResetEvent(false);
             trackingHandlerThread = new Thread(new ThreadStart(this.TrackingHandler));
@@ -175,7 +173,7 @@ namespace newtelligence.DasBlog.Runtime
 
         EntryCollection IBlogDataService.GetEntries(bool fullContent) 
 		{
-            return theCache.GetEntries();
+            return EntryIdCache.GetInstance(data).GetEntries();
         }
 
         protected DateTime GetDateForEntry(string entryId)
@@ -480,7 +478,8 @@ namespace newtelligence.DasBlog.Runtime
 					ModifiedUtc = day.DateUtc,
 					IsPublic = true,
 					AllowComments = false,
-					ShowOnFrontPage = true
+					ShowOnFrontPage = true,
+					Language= null,
 				};
 
 				foreach (var entry in day.GetEntries(entryCriteria))
@@ -556,9 +555,8 @@ namespace newtelligence.DasBlog.Runtime
                 entryCriteria += EntryCollectionFilter.DefaultFilters.IsInAcceptedLanguagesOrMultiLingual(acceptLanguages);
             }
 
-			// set the time on the startDateUtc to 23:59:59, then shift to TZ
-			var startDate = startDateUtc.ToUniversalTime().Date.AddDays(1).AddSeconds(-1);
-			startDate = new DateTimeOffset(startDate, tz.GetUtcOffset(startDate.ToInstant()).ToTimeSpan()).LocalDateTime;
+			// set the time on the startDateUtc to 23:59:59
+			var startDate = startDateUtc.Date.AddDays(1).AddSeconds(-1);				
 			entries = GetEntries(
                 DayEntryCollectionFilter.DefaultFilters.OccursBefore(startDate),
                 entryCriteria,
@@ -1346,7 +1344,7 @@ namespace newtelligence.DasBlog.Runtime
 
 			// The entry lookup hashtables use the UrlEncoded version of the entryId or compressed title
 			posttitle = WebUtility.UrlEncode(posttitle);
-			DateTime foundDate = theCache.GetDateFromCompressedTitle(posttitle);
+			DateTime foundDate = EntryIdCache.GetInstance(data).GetDateFromCompressedTitle(posttitle);
 			if (foundDate == DateTime.MinValue)
 			{
 				entryResult = null;
@@ -1366,6 +1364,12 @@ namespace newtelligence.DasBlog.Runtime
 				entryResult = null;
 			}
 			return entryResult;
+		}
+
+		public void ResetCaches()
+		{
+			this.data.IncrementEntryEpoch();
+			this.data.IncrementExtraEpoch();
 		}
 	}
 }

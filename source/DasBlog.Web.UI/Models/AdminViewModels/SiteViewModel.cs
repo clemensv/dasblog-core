@@ -308,10 +308,12 @@ namespace DasBlog.Web.Models.AdminViewModels
 		public string DefaultSources { get; set; }
 
 		[DisplayName("Mastodon Server")]
+		[DisplayName("Mastodon Server")]
 		[Description("")]
 		[DataType(DataType.Url, ErrorMessage = "Invalid URL format")]
 		public string MastodonServerUrl { get; set; }
 
+		[DisplayName("Mastodon Account (@username)")]
 		[DisplayName("Mastodon Account (@username)")]
 		[Description("")]
 		[RegularExpression("(@)((?:[A-Za-z0-9-_]*))")]
@@ -321,6 +323,12 @@ namespace DasBlog.Web.Models.AdminViewModels
 		[Description("")]
 		[DataType(DataType.Text, ErrorMessage = "Invalid Guid format")]
 		public string PostPinnedToHomePage { get; set; }
+		[DisplayName("Enable rewriting hashtags to category links")]
+		public bool EnableRewritingHashtagsToCategoryLinks { get; set; }
+		[DisplayName("Enable rewriting bare links to embeddings")]
+		public bool EnableRewritingBareLinksToEmbeddings { get; set; }
+		[DisplayName("Enable rewriting bare links to icons")]
+		public bool EnableRewritingBareLinksToIcons { get; set; }
 
 		public bool EntryTitleAsLink { get; set; }
 		public bool ObfuscateEmail { get; set; }
@@ -404,5 +412,6 @@ namespace DasBlog.Web.Models.AdminViewModels
 		public string RSSEndPointRewrite { get; set; }
 		public bool CategoryAllEntries { get; set; }
 		public string AllowedHosts { get; set; }
+
 	}
 }

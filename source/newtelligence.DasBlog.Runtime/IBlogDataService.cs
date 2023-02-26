@@ -237,5 +237,6 @@ namespace newtelligence.DasBlog.Runtime
 		StaticPage GetStaticPage( string pagename );
 		Entry GetVirtualEntryForDay(DateTime postDay);
 		Entry GetEntryByTitle(string posttitle);
+		void ResetCaches();
 	}
 }

@@ -60,7 +60,7 @@ namespace DasBlog.Managers
 			}
 			else
 			{
-				var entries = dataService.GetEntriesForDay(dt.Value, dasBlogSettings.GetConfiguredTimeZone(), null, 1, 10, null);
+				var entries = dataService.GetEntriesForDay(dt.Value, dasBlogSettings.GetConfiguredTimeZone(), null, 2, 10, null);
 				// GeneratePostUrl runs UrlEncode over the URL and therefore we have to do the same here to 
 				// make sure we match Umlauts and other characters requiring encoding that occur in titles.
 				var encodedPostTitle = WebUtility.UrlEncode(posttitle);
@@ -285,12 +285,6 @@ namespace DasBlog.Managers
 			// now save the entry, passign in all the necessary Trackback and Pingback info.
 			try
 			{
-				// if the post is missing a title don't publish it
-				if (entry.Title == null || entry.Title.Length == 0)
-				{
-					entry.IsPublic = false;
-				}
-
 				// if the post is missing categories, then set the categories to empty string.
 				if (entry.Categories == null)
 					entry.Categories = "";
@@ -592,6 +586,11 @@ namespace DasBlog.Managers
 		Entry IBlogManager.GetVirtualBlogPostForDay(DateTime postDay)
 		{
 			return dataService.GetVirtualEntryForDay(postDay);
+		}
+
+		public void ResetCaches()
+		{
+			dataService.ResetCaches();
 		}
 	}
 }

@@ -616,6 +616,45 @@
         </div>
     </div>
 
+
+    
+    <div class="form-check row mb-3">
+        <div class="col-sm-10 offset-sm-2">
+            <div class="col-sm-2">
+                @Html.CheckBoxFor(m => @Model.SiteConfig.EnableRewritingBareLinksToEmbeddings, new { @class = "form-check-input form-check-input" })
+            </div>
+            @Html.LabelFor(m => @Model.SiteConfig.EnableRewritingBareLinksToEmbeddings, null, new { @class = "col-check-label col-sm-10" })
+        </div>
+    </div>
+
+    <div class="form-check row mb-3">
+        <div class="col-sm-10 offset-sm-2">
+            <div class="col-sm-2">
+                @Html.CheckBoxFor(m => @Model.SiteConfig.EnableRewritingBareLinksToIcons, new { @class = "form-check-input form-check-input" })
+            </div>
+            @Html.LabelFor(m => @Model.SiteConfig.EnableRewritingBareLinksToIcons, null, new { @class = "col-check-label col-sm-10" })
+        </div>
+    </div>
+
+    <div class="form-check row mb-3">
+        <div class="col-sm-10 offset-sm-2">
+            <div class="col-sm-2">
+                @Html.CheckBoxFor(m => @Model.SiteConfig.EnableRewritingHashtagsToCategoryLinks, new { @class = "form-check-input form-check-input" })
+            </div>
+            @Html.LabelFor(m => @Model.SiteConfig.EnableRewritingHashtagsToCategoryLinks, null, new { @class = "col-check-label col-sm-10" })
+        </div>
+    </div>
+
+    
+    <div class="form-check row mb-3">
+        <div class="col-sm-10 offset-sm-2">
+            <div class="col-sm-2">
+                @Html.CheckBoxFor(m => @Model.SiteConfig.EnableTitlePermaLink, new { @class = "form-check-input form-check-input" })
+            </div>
+            @Html.LabelFor(m => @Model.SiteConfig.EnableTitlePermaLink, null, new { @class = "col-check-label col-sm-10" })
+        </div>
+    </div>
+
     <div class="form-check row mb-3">
         <div class="col-sm-10 offset-sm-2">
             <div class="col-sm-2">

@@ -190,7 +190,6 @@ namespace DasBlog.Web
 			services.AddTransient<SiteEmailReport>();
 
 			services
-				.AddTransient<IDasBlogSettings, DasBlogSettings>()
 				.AddTransient<IUserStore<DasBlogUser>, DasBlogUserStore>()
 				.AddTransient<IRoleStore<DasBlogRole>, DasBlogUserRoleStore>()
 				.AddTransient<IPrincipal>(provider => provider.GetService<IHttpContextAccessor>().HttpContext.User)
@@ -222,7 +221,8 @@ namespace DasBlog.Web
 				.AddSingleton<IConfigFileService<MetaTags>, MetaConfigFileService>()
 				.AddSingleton<IConfigFileService<OEmbedProviders>, OEmbedProvidersFileService>()
 				.AddSingleton<IConfigFileService<SiteConfig>, SiteConfigFileService>()
-				.AddSingleton<IConfigFileService<SiteSecurityConfigData>, SiteSecurityConfigFileService>();
+				.AddSingleton<IConfigFileService<SiteSecurityConfigData>, SiteSecurityConfigFileService>()
+				.AddSingleton<IDasBlogSettings, DasBlogSettings>();
 
 			services.AddSingleton<IExternalEmbeddingHandler, ExternalEmbeddingHandler>();
 

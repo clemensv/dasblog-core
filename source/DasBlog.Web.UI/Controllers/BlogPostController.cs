@@ -30,6 +30,7 @@ using EventDataItem = DasBlog.Services.ActivityLogs.EventDataItem;
 using EventCodes = DasBlog.Services.ActivityLogs.EventCodes;
 using AutoMapper.Internal;
 using Markdig.Helpers;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace DasBlog.Web.Controllers
 {
@@ -275,6 +276,7 @@ namespace DasBlog.Web.Controllers
 			return View(post);
 		}
 
+
 		/// <summary>
 		/// This method is for the companion app and allows submitting a snippet 
 		/// as a blog post in form of a plain POST. The method implements a 
@@ -282,9 +284,20 @@ namespace DasBlog.Web.Controllers
 		/// </summary>
 		/// <param name="request"></param>
 		/// <returns></returns>
-		[HttpPost("post/submit"), HttpOptions("post/submit"), AllowAnonymous]
+		[HttpPost("post/submit"), AllowAnonymous]
 		public IActionResult SubmitContent()
 		{
+			return InternalSubmitContent();
+		}
+
+		[HttpOptions("post/submit"), AllowAnonymous]
+		public IActionResult CheckSubmitContent()
+		{
+			return InternalSubmitContent();
+		}
+
+		IActionResult InternalSubmitContent()
+		{ 
 			var request = HttpContext.Request;
 			string tokenUsername = null;
 			var token = request.Headers.Authorization;
@@ -306,7 +319,7 @@ namespace DasBlog.Web.Controllers
 				return new ForbidResult();
 			}
 
-			if ( request.Method == "OPTIONS" )
+			if ( request.Method.Equals("OPTIONS", StringComparison.InvariantCultureIgnoreCase ))
 			{
 				HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
 				HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "POST, OPTIONS");

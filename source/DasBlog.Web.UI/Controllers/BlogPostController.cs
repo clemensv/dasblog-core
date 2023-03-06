@@ -284,13 +284,13 @@ namespace DasBlog.Web.Controllers
 		/// </summary>
 		/// <param name="request"></param>
 		/// <returns></returns>
-		[HttpPost("post/submit"), AllowAnonymous]
+		[HttpPost("submit"), AllowAnonymous]
 		public IActionResult SubmitContent()
 		{
 			return InternalSubmitContent();
 		}
 
-		[HttpOptions("post/submit"), AllowAnonymous]
+		[HttpOptions("submit"), AllowAnonymous]
 		public IActionResult CheckSubmitContent()
 		{
 			return InternalSubmitContent();

@@ -329,7 +329,7 @@ namespace DasBlog.Web.Controllers
 			var token = request.Headers.Authorization;
 			
 			// check the token and extract the username from the token while we're at it
-			if ( !VerifySasToken(token, new Uri(new Uri(dasBlogSettings.GetBaseUrl()), "post/submit").ToString(),
+			if ( !VerifySasToken(token, new Uri(new Uri(dasBlogSettings.GetBaseUrl()), "submit").ToString(),
 				(user) =>
 				{
 					var tokenUser = dasBlogSettings.SecurityConfiguration.Users.Where(
@@ -342,7 +342,7 @@ namespace DasBlog.Web.Controllers
 					return null;
 				}))
 			{
-				return new ForbidResult();
+				return new UnauthorizedResult();
 			}
 
 			if ( request.Method.Equals("OPTIONS", StringComparison.InvariantCultureIgnoreCase ))

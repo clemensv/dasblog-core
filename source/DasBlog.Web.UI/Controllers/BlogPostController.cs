@@ -282,7 +282,7 @@ namespace DasBlog.Web.Controllers
 		/// </summary>
 		/// <param name="request"></param>
 		/// <returns></returns>
-		[HttpPost("post/submit"), AllowAnonymous]
+		[HttpPost("post/submit"), HttpOptions("post/submit"), AllowAnonymous]
 		public IActionResult SubmitContent()
 		{
 			var request = HttpContext.Request;
@@ -304,6 +304,14 @@ namespace DasBlog.Web.Controllers
 				}))
 			{
 				return new ForbidResult();
+			}
+
+			if ( request.Method == "OPTIONS" )
+			{
+				HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+				HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "POST, OPTIONS");
+				HttpContext.Response.Headers.Add("Allow", "POST, OPTIONS");
+				return Ok();				
 			}
 
 			string title = string.Empty;

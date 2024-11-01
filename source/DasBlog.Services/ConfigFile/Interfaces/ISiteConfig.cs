@@ -106,6 +106,14 @@ namespace DasBlog.Services.ConfigFile.Interfaces
 
 		bool EnableStartPageCaching { get; set; }
 
+        bool EnableCloudEvents { get; set; }
+
+        [XmlIgnore]
+        CloudEventsTargetCollection CloudEventsTargets { get; set; }
+
+        [XmlArray("CloudEventsTargets")]
+        CloudEventsTarget[] CloudEventsTargetArray { get; set; }
+
 		bool ShowItemSummaryInAggregatedViews { get; set; }
 
         decimal DisplayTimeZoneIndex { get; set; }

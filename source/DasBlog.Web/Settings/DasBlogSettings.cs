@@ -29,8 +29,8 @@ namespace DasBlog.Web.Settings
 		private readonly IOptionsMonitor<OEmbedProviders> embedProvidersMonitor;
 		private readonly ITimeZoneProvider timeZoneProvider;
 
-		public DasBlogSettings(IWebHostEnvironment env, IOptionsMonitor<SiteConfig> siteConfig, IOptionsMonitor<MetaTags> metaTagsConfig, 
-									IOptionsMonitor<OEmbedProviders> embedProvidersConfig, 
+		public DasBlogSettings(IWebHostEnvironment env, IOptionsMonitor<SiteConfig> siteConfig, IOptionsMonitor<MetaTags> metaTagsConfig,
+									IOptionsMonitor<OEmbedProviders> embedProvidersConfig,
 									ISiteSecurityConfig siteSecurityConfig, IOptions<ConfigFilePathsDataOption> optionsAccessor,
 									ITimeZoneProvider timeZoneProvider)
 		{
@@ -110,25 +110,25 @@ namespace DasBlog.Web.Settings
 			}
 		}
 
-        public string GetPermaLinkUrl(string entryId)
-        {
-            return RelativeToRoot("post/" + entryId);
-        }
+		public string GetPermaLinkUrl(string entryId)
+		{
+			return RelativeToRoot("post/" + entryId);
+		}
 
 		public string GetCommentViewUrl(string entryId)
-        {
-            return RelativeToRoot(entryId) + $"/comments#{Constants.CommentsStartId}";
-        }
+		{
+			return RelativeToRoot(entryId) + $"/comments#{Constants.CommentsStartId}";
+		}
 
-        public string GetTrackbackUrl(string entryId)
-        {
-            return RelativeToRoot("feed/trackback/" + entryId);
-        }
+		public string GetTrackbackUrl(string entryId)
+		{
+			return RelativeToRoot("feed/trackback/" + entryId);
+		}
 
-        public string GetEntryCommentsRssUrl(string entryId)
-        {
-            return RelativeToRoot(RssUrl + "/comments/" + entryId);
-        }
+		public string GetEntryCommentsRssUrl(string entryId)
+		{
+			return RelativeToRoot(RssUrl + $"/{entryId}/comments/");
+		}
 
 		public string GetCategoryViewUrl(string category)
 		{
@@ -142,7 +142,12 @@ namespace DasBlog.Web.Settings
 
 		public string GetRssCategoryUrl(string category)
 		{
-			return string.Empty;
+			return RelativeToRoot($"feed/tags/{category}/rss");
+		}
+
+		public string GetRssEntryUrl(string entryId)
+		{
+			return RelativeToRoot($"feed/rss/{entryId}");
 		}
 
 		public User GetUser(string userName)
@@ -270,7 +275,7 @@ namespace DasBlog.Web.Settings
 			{
 				return false;
 			}
-			else if(SiteConfiguration.EnableComments && !SiteConfiguration.EnableCommentDays)
+			else if (SiteConfiguration.EnableComments && !SiteConfiguration.EnableCommentDays)
 			{
 				return true;
 			}
@@ -343,5 +348,7 @@ namespace DasBlog.Web.Settings
 			var local = LocalDateTime.FromDateTime(datetime);
 			return local.InZoneLeniently(tz).ToDateTimeUtc();
 		}
+
+
 	}
 }

@@ -32,6 +32,21 @@ namespace DasBlog.Managers
             return GetRssCore(null,  dasBlogSettings.SiteConfiguration.RssDayCount, dasBlogSettings.SiteConfiguration.RssMainEntryCount);
         }
 
+		public RssItem GetRssItem(string entryId)
+		{
+			var entry = dataService.GetEntry(entryId);
+            if (entry == null)
+            {
+                return null;
+            }
+
+            var entries = new EntryCollection { entry };
+            var feed = GetRssCore(null, 0, 0, entries);
+            return feed.Channels.Count == 0 || feed.Channels[0].Items.Count == 0
+                ? null
+                : feed.Channels[0].Items[0];
+		}
+
         public RssRoot GetRssCategory(string categoryName)
         {
             return GetRssCore(categoryName, 0, 0);
@@ -185,11 +200,10 @@ namespace DasBlog.Managers
             return feed;
         }
 
-        private RssRoot GetRssCore(string category, int maxDayCount, int maxEntryCount)
+        private RssRoot GetRssCore(string category, int maxDayCount, int maxEntryCount, EntryCollection entries = null)
         {
-            EntryCollection entries = null;
             //We only build the entries if blogcore doesn't exist and we'll need them later...
-            if (dataService.GetLastEntryUpdate() == DateTime.MinValue)
+            if (entries == null && dataService.GetLastEntryUpdate() == DateTime.MinValue)
             {
                 entries = BuildEntries(category, maxDayCount, maxEntryCount);
             }

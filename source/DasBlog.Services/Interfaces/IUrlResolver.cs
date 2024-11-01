@@ -26,6 +26,7 @@ namespace DasBlog.Services
 		string GetCategoryViewUrl(string category);
 		string GetCategoryViewUrlName(string category);
 		string GetRssCategoryUrl(string category);
+		string GetRssEntryUrl(string entryId);
 		string GeneratePostUrl(Entry entry);
 	}
 }

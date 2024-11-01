@@ -308,12 +308,10 @@ namespace DasBlog.Web.Models.AdminViewModels
 		public string DefaultSources { get; set; }
 
 		[DisplayName("Mastodon Server")]
-		[DisplayName("Mastodon Server")]
 		[Description("")]
 		[DataType(DataType.Url, ErrorMessage = "Invalid URL format")]
 		public string MastodonServerUrl { get; set; }
 
-		[DisplayName("Mastodon Account (@username)")]
 		[DisplayName("Mastodon Account (@username)")]
 		[Description("")]
 		[RegularExpression("(@)((?:[A-Za-z0-9-_]*))")]

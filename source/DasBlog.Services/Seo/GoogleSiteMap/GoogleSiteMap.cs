@@ -4,12 +4,12 @@ using System.Xml.Serialization;
 namespace DasBlog.Core.Services.GoogleSiteMap
 {
 	/// <remarks/>
-	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.google.com/schemas/sitemap/0.84")]
-	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.google.com/schemas/sitemap/0.84", IsNullable = false)]
-	public class urlset
+	[System.Xml.Serialization.XmlTypeAttribute(TypeName="urlset", Namespace = "http://www.google.com/schemas/sitemap/0.84")]
+	[System.Xml.Serialization.XmlRootAttribute(ElementName="urlset", Namespace = "http://www.google.com/schemas/sitemap/0.84", IsNullable = false)]
+	public class UrlSet
 	{
 
-		public urlset() { }
+		public UrlSet() { }
 
 		/// <remarks/>
 		[System.Xml.Serialization.XmlElementAttribute("url")]
@@ -17,13 +17,13 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 	}
 
 	/// <remarks/>
-	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.google.com/schemas/sitemap/0.84")]
-	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.google.com/schemas/sitemap/0.84", IsNullable = false)]
-	public class url
+	[System.Xml.Serialization.XmlTypeAttribute(TypeName="url", Namespace = "http://www.google.com/schemas/sitemap/0.84")]
+	[System.Xml.Serialization.XmlRootAttribute(ElementName="url", Namespace = "http://www.google.com/schemas/sitemap/0.84", IsNullable = false)]
+	public class Url
 	{
-		public url() { }
+		public Url() { }
 
-		public url(string locIn, DateTime lastmodIn, changefreq freqIn, Decimal priorityIn)
+		public Url(string locIn, DateTime lastmodIn, ChangeFreq freqIn, Decimal priorityIn)
 		{
 			loc = locIn;
 			lastmod = lastmodIn;
@@ -55,7 +55,7 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		public DateTime lastmod;
 
 		/// <remarks/>
-		public changefreq changefreq;
+		public ChangeFreq changefreq;
 
 		/// <remarks/>
 		[System.Xml.Serialization.XmlIgnoreAttribute()]
@@ -70,9 +70,9 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 	}
 
 	/// <remarks/>
-	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.google.com/schemas/sitemap/0.84")]
-	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.google.com/schemas/sitemap/0.84", IsNullable = false)]
-	public enum changefreq
+	[System.Xml.Serialization.XmlTypeAttribute(TypeName="changefreq", Namespace = "http://www.google.com/schemas/sitemap/0.84")]
+	[System.Xml.Serialization.XmlRootAttribute(ElementName="changefreq", Namespace = "http://www.google.com/schemas/sitemap/0.84", IsNullable = false)]
+	public enum ChangeFreq
 	{
 
 		/// <remarks/>
@@ -117,7 +117,7 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		/// <param name="items">
 		/// The array whose elements are to be added to the new urlCollection.
 		/// </param>
-		public urlCollection(url[] items)
+		public urlCollection(Url[] items)
 		{
 			this.AddRange(items);
 		}
@@ -140,9 +140,9 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		/// <param name="items">
 		/// The array whose elements are to be added to the end of this urlCollection.
 		/// </param>
-		public virtual void AddRange(url[] items)
+		public virtual void AddRange(Url[] items)
 		{
-			foreach (url item in items)
+			foreach (Url item in items)
 			{
 				this.List.Add(item);
 			}
@@ -156,7 +156,7 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		/// </param>
 		public virtual void AddRange(urlCollection items)
 		{
-			foreach (url item in items)
+			foreach (Url item in items)
 			{
 				this.List.Add(item);
 			}
@@ -168,7 +168,7 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		/// <param name="value">
 		/// The url to be added to the end of this urlCollection.
 		/// </param>
-		public virtual void Add(url value)
+		public virtual void Add(Url value)
 		{
 			this.List.Add(value);
 		}
@@ -183,7 +183,7 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		/// true if value is found in this urlCollection;
 		/// false otherwise.
 		/// </returns>
-		public virtual bool Contains(url value)
+		public virtual bool Contains(Url value)
 		{
 			return this.List.Contains(value);
 		}
@@ -199,7 +199,7 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		/// The zero-based index of the first occurrence of the _ELEMENT value if found;
 		/// -1 otherwise.
 		/// </returns>
-		public virtual int IndexOf(url value)
+		public virtual int IndexOf(Url value)
 		{
 			return this.List.IndexOf(value);
 		}
@@ -213,7 +213,7 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		/// <param name="value">
 		/// The url to insert.
 		/// </param>
-		public virtual void Insert(int index, url value)
+		public virtual void Insert(int index, Url value)
 		{
 			this.List.Insert(index, value);
 		}
@@ -221,11 +221,11 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		/// <summary>
 		/// Gets or sets the url at the given index in this urlCollection.
 		/// </summary>
-		public virtual url this[int index]
+		public virtual Url this[int index]
 		{
 			get
 			{
-				return (url)this.List[index];
+				return (Url)this.List[index];
 			}
 			set
 			{
@@ -239,7 +239,7 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 		/// <param name="value">
 		/// The url value to remove from this urlCollection.
 		/// </param>
-		public virtual void Remove(url value)
+		public virtual void Remove(Url value)
 		{
 			this.List.Remove(value);
 		}
@@ -256,11 +256,11 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 				this.wrapped = ((System.Collections.CollectionBase)collection).GetEnumerator();
 			}
 
-			public url Current
+			public Url Current
 			{
 				get
 				{
-					return (url)(this.wrapped.Current);
+					return (Url)(this.wrapped.Current);
 				}
 			}
 
@@ -268,7 +268,7 @@ namespace DasBlog.Core.Services.GoogleSiteMap
 			{
 				get
 				{
-					return (url)(this.wrapped.Current);
+					return (Url)(this.wrapped.Current);
 				}
 			}
 

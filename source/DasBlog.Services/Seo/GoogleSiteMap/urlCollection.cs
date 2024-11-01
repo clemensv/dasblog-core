@@ -20,7 +20,7 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 		/// <param name="items">
 		/// The array whose elements are to be added to the new urlCollection.
 		/// </param>
-		public urlCollection(url[] items)
+		public urlCollection(Url[] items)
 		{
 			this.AddRange(items);
 		}
@@ -43,9 +43,9 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 		/// <param name="items">
 		/// The array whose elements are to be added to the end of this urlCollection.
 		/// </param>
-		public virtual void AddRange(url[] items)
+		public virtual void AddRange(Url[] items)
 		{
-			foreach (url item in items)
+			foreach (Url item in items)
 			{
 				this.List.Add(item);
 			}
@@ -59,7 +59,7 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 		/// </param>
 		public virtual void AddRange(urlCollection items)
 		{
-			foreach (url item in items)
+			foreach (Url item in items)
 			{
 				this.List.Add(item);
 			}
@@ -71,7 +71,7 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 		/// <param name="value">
 		/// The url to be added to the end of this urlCollection.
 		/// </param>
-		public virtual void Add(url value)
+		public virtual void Add(Url value)
 		{
 			this.List.Add(value);
 		}
@@ -86,7 +86,7 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 		/// true if value is found in this urlCollection;
 		/// false otherwise.
 		/// </returns>
-		public virtual bool Contains(url value)
+		public virtual bool Contains(Url value)
 		{
 			return this.List.Contains(value);
 		}
@@ -102,7 +102,7 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 		/// The zero-based index of the first occurrence of the _ELEMENT value if found;
 		/// -1 otherwise.
 		/// </returns>
-		public virtual int IndexOf(url value)
+		public virtual int IndexOf(Url value)
 		{
 			return this.List.IndexOf(value);
 		}
@@ -116,7 +116,7 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 		/// <param name="value">
 		/// The url to insert.
 		/// </param>
-		public virtual void Insert(int index, url value)
+		public virtual void Insert(int index, Url value)
 		{
 			this.List.Insert(index, value);
 		}
@@ -124,11 +124,11 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 		/// <summary>
 		/// Gets or sets the url at the given index in this urlCollection.
 		/// </summary>
-		public virtual url this[int index]
+		public virtual Url this[int index]
 		{
 			get
 			{
-				return (url)this.List[index];
+				return (Url)this.List[index];
 			}
 			set
 			{
@@ -142,7 +142,7 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 		/// <param name="value">
 		/// The url value to remove from this urlCollection.
 		/// </param>
-		public virtual void Remove(url value)
+		public virtual void Remove(Url value)
 		{
 			this.List.Remove(value);
 		}
@@ -159,11 +159,11 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 				this.wrapped = ((System.Collections.CollectionBase)collection).GetEnumerator();
 			}
 
-			public url Current
+			public Url Current
 			{
 				get
 				{
-					return (url)(this.wrapped.Current);
+					return (Url)(this.wrapped.Current);
 				}
 			}
 
@@ -171,7 +171,7 @@ namespace DasBlog.Services.Seo.GoogleSiteMap
 			{
 				get
 				{
-					return (url)(this.wrapped.Current);
+					return (Url)(this.wrapped.Current);
 				}
 			}
 

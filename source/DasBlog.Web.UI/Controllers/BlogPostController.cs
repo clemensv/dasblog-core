@@ -321,9 +321,9 @@ namespace DasBlog.Web.Controllers
 
 			if ( request.Method.Equals("OPTIONS", StringComparison.InvariantCultureIgnoreCase ))
 			{
-				HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
-				HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "POST, OPTIONS");
-				HttpContext.Response.Headers.Add("Allow", "POST, OPTIONS");
+				HttpContext.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+				HttpContext.Response.Headers.Append("Access-Control-Allow-Methods", "POST, OPTIONS");
+				HttpContext.Response.Headers.Append("Allow", "POST, OPTIONS");
 				return Ok();				
 			}
 

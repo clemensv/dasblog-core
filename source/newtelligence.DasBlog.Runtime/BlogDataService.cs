@@ -544,16 +544,15 @@ namespace newtelligence.DasBlog.Runtime
 			EntryCollection entries;
             Predicate<Entry> entryCriteria = null;
 						
-			if (categoryName != null &&
-                categoryName.Length > 0)
+			if (!string.IsNullOrEmpty(categoryName) && categoryName.Trim().Length > 0)
             {
                 entryCriteria += EntryCollectionFilter.DefaultFilters.IsInCategory(categoryName);
             }
 
-            if (acceptLanguages != null && acceptLanguages.Length > 0)
-            {
-                entryCriteria += EntryCollectionFilter.DefaultFilters.IsInAcceptedLanguagesOrMultiLingual(acceptLanguages);
-            }
+            //if (!string.IsNullOrEmpty(acceptLanguages) && acceptLanguages.Trim().Length > 0)
+            //{
+            //    entryCriteria += EntryCollectionFilter.DefaultFilters.IsInAcceptedLanguagesOrMultiLingual(acceptLanguages);
+            //}
 
 			// set the time on the startDateUtc to 23:59:59
 			var startDate = startDateUtc.Date.AddDays(1).AddSeconds(-1);				
@@ -580,10 +579,10 @@ namespace newtelligence.DasBlog.Runtime
             entryCriteria += EntryCollectionFilter.DefaultFilters.OccursInMonth(
                 timeZone, month);
 
-            if (acceptLanguages != null && acceptLanguages.Length > 0)
-            {
-                entryCriteria += EntryCollectionFilter.DefaultFilters.IsInAcceptedLanguagesOrMultiLingual(acceptLanguages);
-            }
+            //if (acceptLanguages != null && acceptLanguages.Length > 0)
+            //{
+            //    entryCriteria += EntryCollectionFilter.DefaultFilters.IsInAcceptedLanguagesOrMultiLingual(acceptLanguages);
+            //}
 
             // TODO:  In theory it should be unnecessary to specify the maxDays because there cannot be more than one
             // DayEntry per day but it existed in previous code so .  Verify and then remove.
@@ -618,10 +617,10 @@ namespace newtelligence.DasBlog.Runtime
                     {
                         Predicate<Entry> entryCriteria = null;
 
-                        if (acceptLanguages != null && acceptLanguages.Length > 0)
-                        {
-                            entryCriteria += EntryCollectionFilter.DefaultFilters.IsInAcceptedLanguagesOrMultiLingual(acceptLanguages);
-                        }
+                        //if (acceptLanguages != null && acceptLanguages.Length > 0)
+                        //{
+                        //    entryCriteria += EntryCollectionFilter.DefaultFilters.IsInAcceptedLanguagesOrMultiLingual(acceptLanguages);
+                        //}
 
 
                         day.LoadIfRequired(data);

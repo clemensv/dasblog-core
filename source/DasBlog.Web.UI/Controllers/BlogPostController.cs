@@ -405,7 +405,7 @@ namespace DasBlog.Web.Controllers
 				return new BadRequestResult();
 			}
 			BreakSiteCache();
-			return new CreatedResult(string.Format("~/post/{0}", entry.EntryId), null);
+			return new CreatedResult(dasBlogSettings.RelativeToRoot($"post/{entry.EntryId}"), null);
 		}
 
 		private bool VerifySasToken(string sasToken, string uri, Func<string, byte[]> getKeyForUserName)

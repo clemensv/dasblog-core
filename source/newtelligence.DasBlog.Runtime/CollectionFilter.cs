@@ -67,11 +67,7 @@ namespace newtelligence.DasBlog.Runtime
                 }
                 else
                 {
-                    //filteredCollection = new U();
-                    //foreach (T item in source)
-                    //{
                     filteredCollection.Add(entry);
-                    //}
                 }
             
 

@@ -37,14 +37,47 @@ namespace DasBlog.Services.Site
 		public async Task<string> InjectCategoryLinksAsync(string content)
 #pragma warning restore CS1998
 		{
-			if (dasBlogSettings.SiteConfiguration.EnableRewritingHashtagsToCategoryLinks)
-			{
-			return Regex.Replace(content, @"(?<!=['""])#(\w+)", $"<a href=\"{dasBlogSettings.RelativeToRoot("category/")}$1\">#$1 </a>");
-		}
-			else
+			if (!dasBlogSettings.SiteConfiguration.EnableRewritingHashtagsToCategoryLinks)
 			{
 				return content;
 			}
+
+			var doc = new HtmlDocument();
+			doc.LoadHtml(content);
+
+			// Regex to match hashtags
+			var hashtagRegex = new Regex(@"\B#(\w+)", RegexOptions.Compiled);
+
+			// Select all text nodes that are not inside <pre> tags
+			var textNodes = doc.DocumentNode.SelectNodes("//text()[not(ancestor::pre)]");
+
+			if (textNodes != null)
+			{
+				foreach (var node in textNodes)
+				{
+					// Skip text inside script and style tags
+					if (node.ParentNode.Name == "script" || node.ParentNode.Name == "style")
+					{
+						continue;
+					}
+
+					var originalText = node.InnerText;
+					var newText = hashtagRegex.Replace(originalText, match =>
+					{
+						var tag = $"<a href=\"{dasBlogSettings.RelativeToRoot("category/")}{match.Groups[1].Value}\">#{match.Groups[1].Value}</a>";
+						return tag;
+					});
+
+					if (newText != originalText)
+					{
+						// Replace the text node with the new HTML content
+						var newNode = HtmlNode.CreateNode(newText);
+						node.ParentNode.ReplaceChild(newNode, node);
+					}
+				}
+			}
+
+			return doc.DocumentNode.OuterHtml;
 		}
 
 		public static bool IsWildCardUrlMatch(string pattern, string text)

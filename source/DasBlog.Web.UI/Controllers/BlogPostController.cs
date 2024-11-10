@@ -185,6 +185,9 @@ namespace DasBlog.Web.Controllers
 				if (entry != null)
 				{
 					pvm = mapper.Map<PostViewModel>(entry);
+					pvm.Content = embeddingHandler.InjectCategoryLinksAsync(pvm.Content).GetAwaiter().GetResult();
+					pvm.Content = embeddingHandler.InjectDynamicEmbeddingsAsync(pvm.Content).GetAwaiter().GetResult();
+					pvm.Content = embeddingHandler.InjectIconsForBareLinksAsync(pvm.Content).GetAwaiter().GetResult();
 					pvm.PermaLink = dasBlogSettings.RelativeToRoot(pvm.PermaLink);
 					modelViewCreator.AddAllLanguages(pvm);
 					List<CategoryViewModel> allcategories = mapper.Map<List<CategoryViewModel>>(blogManager.GetCategories());

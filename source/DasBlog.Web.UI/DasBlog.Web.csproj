@@ -22,7 +22,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
+     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Coravel" Version="6.0.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.70" />
     <PackageReference Include="Markdig" Version="0.38.0" />
@@ -35,11 +35,11 @@
     <PackageReference Include="NetEscapades.Extensions.Logging.RollingFile" Version="2.5.0" />
     <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
     <PackageReference Include="reCAPTCHA.AspNetCore" Version="3.0.10" />
-    <PackageReference Include="Quartz.AspNetCore" Version="3.13.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Quartz.AspNetCore" Version="3.13.1" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />    
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DasBlog.CLI\DasBlog.CLI.csproj" />
+    <!--<ProjectReference Include="..\DasBlog.CLI\DasBlog.CLI.csproj" />-->
     <ProjectReference Include="..\DasBlog.Web.Core\DasBlog.Core.csproj" />
     <ProjectReference Include="..\DasBlog.Services\DasBlog.Services.csproj" />
     <ProjectReference Include="..\DasBlog.Web.Repositories\DasBlog.Managers.csproj" />

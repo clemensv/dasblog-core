@@ -20,7 +20,6 @@ using DasBlog.Web.Services;
 using DasBlog.Web.Services.Interfaces;
 using DasBlog.Web.Settings;
 using DasBlog.Web.TagHelpers.RichEdit;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -36,6 +35,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
+using System.Threading.Tasks;
 using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
 
 namespace DasBlog.Web
@@ -185,25 +185,50 @@ namespace DasBlog.Web
 				options.ExpireTimeSpan = TimeSpan.FromSeconds(10000);
 			});
 
-			services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-					.AddCookie(options =>
+			services.AddAuthentication()
+					.AddOpenIdConnect(MicrosoftAuthenticationDefaults.Scheme, options =>
 					{
-						options.LoginPath = "/account/login";
-						options.LogoutPath = "/account/logout";
-						options.AccessDeniedPath = "/account/accessdenied";
-						options.SlidingExpiration = true;
-						options.Cookie = new CookieBuilder
+						var microsoftAuthentication = configuration
+							.GetSection(MicrosoftAuthenticationOptions.SectionName)
+							.Get<MicrosoftAuthenticationOptions>();
+
+						options.SignInScheme = IdentityConstants.ExternalScheme;
+						options.Authority = $"https://login.microsoftonline.com/{microsoftAuthentication.TenantId}/v2.0";
+						options.ClientId = microsoftAuthentication.ClientId;
+						options.ClientSecret = microsoftAuthentication.ClientSecret;
+						options.CallbackPath = "/signin-microsoft";
+						options.ResponseType = "code";
+						options.SaveTokens = false;
+						options.GetClaimsFromUserInfoEndpoint = false;
+						options.Events.OnRemoteFailure = context =>
 						{
-							HttpOnly = true
+							var logger = context.HttpContext.RequestServices
+								.GetRequiredService<ILoggerFactory>()
+								.CreateLogger("MicrosoftAuthentication");
+							logger.LogWarning("Microsoft authentication failed. Trace identifier: {traceIdentifier}",
+								context.HttpContext.TraceIdentifier);
+							context.HandleResponse();
+							context.Response.Redirect($"{context.Request.PathBase}/account/accessdenied");
+							return Task.CompletedTask;
 						};
 					});
+
+			services
+				.AddOptions<MicrosoftAuthenticationOptions>()
+				.Bind(configuration.GetSection(MicrosoftAuthenticationOptions.SectionName))
+				.ValidateDataAnnotations()
+				.Validate(options => options.TenantId == MicrosoftAuthenticationPolicy.TenantId,
+					"The Microsoft authentication tenant does not match the site policy.")
+				.Validate(options => options.ClientId == MicrosoftAuthenticationPolicy.ClientId,
+					"The Microsoft authentication application does not match the site policy.")
+				.ValidateOnStart();
 
 			services.Configure<CookiePolicyOptions>(options =>
 			{
 				bool.TryParse(configuration.GetSection("CookieConsentEnabled").Value, out var flag);
 
 				options.CheckConsentNeeded = context => flag;
-					options.MinimumSameSitePolicy = SameSiteMode.Lax;
+					options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
 			});
 
 

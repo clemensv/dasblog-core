@@ -11,11 +11,13 @@ using DasBlog.Web.Services;
 using DasBlog.Web.Settings;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace DasBlog.Web.Controllers
@@ -32,7 +34,7 @@ namespace DasBlog.Web.Controllers
 		private readonly IUserService userService;
 		private readonly ISiteSecurityManager siteSecurityManager;
 		private readonly ISiteSecurityConfig siteSecurityConfig;
-		private const string LOGIN = "Login";
+		private readonly IDasBlogSettings settings;
 
 		public AccountController(UserManager<DasBlogUser> userManager, SignInManager<DasBlogUser> signInManager,
 							IMapper mapper, ILogger<AccountController> logger, IDasBlogSettings settings,
@@ -48,49 +50,71 @@ namespace DasBlog.Web.Controllers
 			this.userService = userService;
 			this.siteSecurityManager = siteSecurityManager;
 			this.siteSecurityConfig = siteSecurityConfig;
+			this.settings = settings;
 		}
 
 		[HttpGet]
 		[AllowAnonymous]
-		public async Task<IActionResult> Login(string returnUrl = null)
+		public IActionResult Login(string returnUrl = null)
 		{
-			// TODO: https://go.microsoft.com/fwlink/?linkid=845470
-			await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-			ViewData[KEY_RETURNURL] = returnUrl;
-			DefaultPage(LOGIN);
-			return View();
-		}
-
-		[HttpPost]
-		[AllowAnonymous]
-		[ValidateAntiForgeryToken]
-		[EnableRateLimiting("login")]
-		public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
-		{
-			ViewData[KEY_RETURNURL] = returnUrl;
-			if (ModelState.IsValid)
+			if (firstRunService.IsSetupRequired())
 			{
-				// Note: lockoutOnFailure is intentionally false. The login email is publicly
-				// visible (it's the author byline on posts), so per-account lockout would let any
-				// anonymous visitor lock the admin out by deliberately failing logins. Brute-force
-				// is mitigated by the per-IP "login" rate-limit policy applied to this action.
-				var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-
-				if (result.Succeeded)
-				{
-					logger.LogInformation(new EventDataItem(EventCodes.SecuritySuccess, null, 
-												"{email} logged in successfully", model.Email));
-
-					return LocalRedirect(returnUrl ?? Url.Action("Index", "Home"));
-				}
-				logger.LogInformation(new EventDataItem(EventCodes.SecurityFailure, null, 
-												"{email} failed to log in", model.Email));
-
-				ModelState.AddModelError(string.Empty, "The username and/or password is incorrect. Please try again.");
+				return RedirectToAction(nameof(Setup));
 			}
 
-			return View(model);
+			var callbackUrl = Url.Action(nameof(MicrosoftCallback), new
+			{
+				returnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : null
+			});
+
+			return Challenge(
+				new AuthenticationProperties { RedirectUri = callbackUrl },
+				MicrosoftAuthenticationDefaults.Scheme);
+		}
+
+		[HttpGet]
+		[AllowAnonymous]
+		public async Task<IActionResult> MicrosoftCallback(string returnUrl = null)
+		{
+			var externalIdentity = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+			var principal = externalIdentity.Principal;
+			var tenantId = principal?.FindFirstValue("http://schemas.microsoft.com/identity/claims/tenantid")
+				?? principal?.FindFirstValue("tid");
+			var objectId = principal?.FindFirstValue("http://schemas.microsoft.com/identity/claims/objectidentifier")
+				?? principal?.FindFirstValue("oid");
+
+			if (!externalIdentity.Succeeded
+				|| !string.Equals(tenantId, MicrosoftAuthenticationPolicy.TenantId, StringComparison.OrdinalIgnoreCase)
+				|| !string.Equals(objectId, MicrosoftAuthenticationPolicy.AllowedObjectId, StringComparison.OrdinalIgnoreCase))
+			{
+				logger.LogWarning(new EventDataItem(EventCodes.SecurityFailure, null,
+					"Rejected Microsoft identity {tenantId}/{objectId}", tenantId, objectId));
+				await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+				return Forbid();
+			}
+
+			var localUser = settings.GetUserByEmail(MicrosoftAuthenticationPolicy.LocalUserEmail);
+			var user = await userManager.FindByEmailAsync(MicrosoftAuthenticationPolicy.LocalUserEmail);
+			if (localUser == null || !localUser.Active || user == null || !await signInManager.CanSignInAsync(user))
+			{
+				logger.LogWarning("The configured dasBlog user {email} is missing, inactive, or cannot sign in.", MicrosoftAuthenticationPolicy.LocalUserEmail);
+				await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+				return Forbid();
+			}
+
+			await signInManager.SignInAsync(user, isPersistent: false);
+			await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+			logger.LogInformation(new EventDataItem(EventCodes.SecuritySuccess, null,
+				"{email} logged in with Microsoft", MicrosoftAuthenticationPolicy.LocalUserEmail));
+
+			return LocalRedirect(Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Action("Index", "Home"));
+		}
+
+		[HttpGet]
+		[AllowAnonymous]
+		public IActionResult AccessDenied()
+		{
+			return StatusCode(StatusCodes.Status403Forbidden);
 		}
 
 		[HttpGet]

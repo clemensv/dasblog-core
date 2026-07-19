@@ -5,7 +5,6 @@
 
 @{
     ViewBag.Title = "Site Settings";
-    Layout = "../../Themes/dasblog/_Layout.cshtml";
 
     // Configure modal parameters
     ViewData["ModalId"] = "confirmSaveModal";
@@ -15,8 +14,10 @@
     ViewData["HiddenButtonId"] = "hiddenSaveButton";
 }
 
-<h1>@ViewData["Title"]</h1>
-<hr />
+<header class="blog-admin-heading">
+    <p class="eyebrow">Administration / Configuration</p>
+    <h1>@ViewData["Title"]</h1>
+</header>
 @Html.ValidationSummary(false, "", new { @class = "text-danger" })
 
 <!-- Success Alert using reusable partial -->
@@ -32,7 +33,7 @@
     </div>
 }
 
-<form asp-action="settings" method="post" name="UpdateSettingsForm" id="UpdateSettingsForm">
+<form asp-action="settings" method="post" name="UpdateSettingsForm" id="UpdateSettingsForm" class="blog-admin-form">
 
     <div class="accordion" id="accordionExample">
         <div class="accordion-item">

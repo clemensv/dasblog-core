@@ -35,144 +35,64 @@
 
 <form asp-action="settings" method="post" name="UpdateSettingsForm" id="UpdateSettingsForm" class="blog-admin-form">
 
-    <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                    Main
-                </button>
-            </h2>
-            <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_General" />
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFrontPage" aria-expanded="false" aria-controls="collapseFrontPage">
-                    Front Page
-                </button>
-            </h2>
-            <div id="collapseFrontPage" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_FrontPage" />
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMetaData" aria-expanded="false" aria-controls="collapseMetaData">
-                    Meta Data
-                </button>
-            </h2>
-            <div id="collapseMetaData" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_MetaData" />
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocial" aria-expanded="false" aria-controls="collapseSocial">
-                    Social
-                </button>
-            </h2>
-            <div id="collapseSocial" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_Social" />
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRSSFeed" aria-expanded="false" aria-controls="collapseRSSFeed">
-                    RSS Feed
-                </button>
-            </h2>
-            <div id="collapseRSSFeed" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_RSSFeed" />
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseComments" aria-expanded="false" aria-controls="collapseComments">
-                    Comments
-                </button>
-            </h2>
-            <div id="collapseComments" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_Comments" />
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBloggingEditing" aria-expanded="false" aria-controls="collapseBloggingEditing">
-                    Blogging & Editing
-                </button>
-            </h2>
-            <div id="collapseBloggingEditing" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_BlogEditing" />
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEmailNotifications" aria-expanded="false" aria-controls="collapseEmailNotifications">
-                    Email & Notifications
-                </button>
-            </h2>
-            <div id="collapseEmailNotifications" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_EmailNotifications" />
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAppearance" aria-expanded="false" aria-controls="collapseAppearance">
-                    Appearance
-                </button>
-            </h2>
-            <div id="collapseAppearance" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_Appearance" />
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInternal" aria-expanded="false" aria-controls="collapseInternal">
-                    Internal
-                </button>
-            </h2>
-            <div id="collapseInternal" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_Internal" />
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSecurity" aria-expanded="false" aria-controls="collapseSecurity">
-                    Security
-                </button>
-            </h2>
-            <div id="collapseSecurity" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <partial name="_Admin_Security" />
-                </div>
-            </div>
+    <div class="settings-tabs" data-settings-tabs>
+        <div class="settings-tabs__list" role="tablist" aria-label="Settings sections">
+            <button type="button" id="settings-tab-general" role="tab" aria-controls="settings-general" aria-selected="true">General</button>
+            <button type="button" id="settings-tab-feeds" role="tab" aria-controls="settings-feeds" aria-selected="false" tabindex="-1">Feeds</button>
+            <button type="button" id="settings-tab-comments" role="tab" aria-controls="settings-comments" aria-selected="false" tabindex="-1">Comments</button>
+            <button type="button" id="settings-tab-metadata" role="tab" aria-controls="settings-metadata" aria-selected="false" tabindex="-1">Metadata</button>
+            <button type="button" id="settings-tab-editing" role="tab" aria-controls="settings-editing" aria-selected="false" tabindex="-1">Editing</button>
+            <button type="button" id="settings-tab-email" role="tab" aria-controls="settings-email" aria-selected="false" tabindex="-1">Email</button>
+            <button type="button" id="settings-tab-appearance" role="tab" aria-controls="settings-appearance" aria-selected="false" tabindex="-1">Appearance</button>
+            <button type="button" id="settings-tab-advanced" role="tab" aria-controls="settings-advanced" aria-selected="false" tabindex="-1">Advanced</button>
         </div>
     </div>
+
+    <section id="settings-general" class="settings-tab-panel" role="tabpanel" aria-labelledby="settings-tab-general">
+        <h2>General</h2>
+        <partial name="_Admin_General" />
+        <h3>Front Page</h3>
+        <partial name="_Admin_FrontPage" />
+    </section>
+
+    <section id="settings-feeds" class="settings-tab-panel" role="tabpanel" aria-labelledby="settings-tab-feeds" hidden>
+        <h2>Feeds</h2>
+        <partial name="_Admin_RSSFeed" />
+    </section>
+
+    <section id="settings-comments" class="settings-tab-panel" role="tabpanel" aria-labelledby="settings-tab-comments" hidden>
+        <h2>Comments</h2>
+        <partial name="_Admin_Comments" />
+    </section>
+
+    <section id="settings-metadata" class="settings-tab-panel" role="tabpanel" aria-labelledby="settings-tab-metadata" hidden>
+        <h2>Metadata</h2>
+        <partial name="_Admin_MetaData" />
+        <h3>Social</h3>
+        <partial name="_Admin_Social" />
+    </section>
+
+    <section id="settings-editing" class="settings-tab-panel" role="tabpanel" aria-labelledby="settings-tab-editing" hidden>
+        <h2>Blogging &amp; Editing</h2>
+        <partial name="_Admin_BlogEditing" />
+    </section>
+
+    <section id="settings-email" class="settings-tab-panel" role="tabpanel" aria-labelledby="settings-tab-email" hidden>
+        <h2>Email &amp; Notifications</h2>
+        <partial name="_Admin_EmailNotifications" />
+    </section>
+
+    <section id="settings-appearance" class="settings-tab-panel" role="tabpanel" aria-labelledby="settings-tab-appearance" hidden>
+        <h2>Appearance</h2>
+        <partial name="_Admin_Appearance" />
+    </section>
+
+    <section id="settings-advanced" class="settings-tab-panel" role="tabpanel" aria-labelledby="settings-tab-advanced" hidden>
+        <h2>Advanced</h2>
+        <partial name="_Admin_Internal" />
+        <h3>Security</h3>
+        <partial name="_Admin_Security" />
+    </section>
 
     <hr />
 
@@ -190,22 +110,7 @@
         <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.16.0/jquery.validate.min.js"></script>
         <script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.6/jquery.validate.unobtrusive.min.js"></script>
         <script src="~/js/dasblog-ui.js"></script>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Initialize accordion tracking using shared utility
-                const accordionItems = document.querySelectorAll('.accordion-collapse');
-                DasBlog.UI.initAccordionTracking('settingsAccordionState', accordionItems);
-
-                // Save accordion state before form submission
-                const confirmSaveButton = document.getElementById('confirmSaveModalButton');
-                if (confirmSaveButton) {
-                    confirmSaveButton.addEventListener('click', function() {
-                        DasBlog.UI.saveAccordionState('settingsAccordionState', accordionItems);
-                    });
-                }
-            });
-        </script>
+        <script src="~/js/settings-tabs.js" asp-append-version="true"></script>
 
     }
 

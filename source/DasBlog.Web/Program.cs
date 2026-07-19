@@ -123,7 +123,7 @@ var basePath = "/";
 if (!string.IsNullOrWhiteSpace(dasBlogSettings.SiteConfiguration.Root))
 {
 	var rootUri = new Uri(dasBlogSettings.SiteConfiguration.Root);
-	basePath = rootUri.AbsolutePath;
+	basePath = rootUri.AbsolutePath.TrimEnd('/');
 }
 
 //Deal with path base and proxies that change the request path

@@ -298,6 +298,7 @@ namespace DasBlog.Web.Controllers
 		}
 
 		[HttpGet("admin/post/create")]
+		[HttpGet("post/create")]
 		public IActionResult CreatePost()
 		{
 			var post = modelViewCreator.CreateBlogPostVM();
